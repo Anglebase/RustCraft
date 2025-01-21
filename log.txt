@@ -1,0 +1,3 @@
+[INFO]  test |: test message
+[WARN]  test |: test message
+[ERROR] test |: test message
