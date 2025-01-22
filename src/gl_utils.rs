@@ -102,6 +102,7 @@ pub unsafe fn create_model_context(
             gl::FLOAT => size as i32 * std::mem::size_of::<GLfloat>() as i32,
             gl::INT => size as i32 * std::mem::size_of::<GLint>() as i32,
             gl::BOOL => size as i32 * std::mem::size_of::<GLboolean>() as i32,
+            0 => size as i32 * std::mem::size_of::<u8>() as i32,
             _ => panic!("Invalid type id"),
         };
     }

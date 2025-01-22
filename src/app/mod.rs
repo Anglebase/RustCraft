@@ -22,6 +22,11 @@ pub struct App {
 }
 
 impl App {
+    /// 设置渲染线程初始化回调函数
+    /// 
+    /// # 注解 Note
+    /// + 调用此函数时，OpenGL 上下文已完成初始化
+    /// + 此函数应在 `App::new()` 之前调用
     pub fn set_render_init_callback<F>(func: F)
     where
         F: FnOnce() + Send + 'static,
@@ -30,6 +35,11 @@ impl App {
             *data = Some(Box::new(func));
         });
     }
+    /// 设置渲染线程循环回调函数
+    /// 此函数通常是渲染函数
+    /// 
+    /// # 注解 Note
+    /// 此函数应在 `App::new()` 之前调用
     pub fn set_render_loop_callback<F>(func: F)
     where
         F: FnMut() + Send + 'static,
@@ -39,6 +49,17 @@ impl App {
         });
     }
 
+    /// 执行应用程序初始化
+    /// 
+    /// # 参数 Parameters
+    /// - `width` - 窗口宽度
+    /// - `height` - 窗口高度
+    /// - `title` - 窗口标题
+    /// 
+    /// # 返回值 Returns
+    /// 返回 `App` 实例
+    /// 
+    /// # 注解 Note
     pub fn new(width: u32, height: u32, title: &str) -> Self {
         info!("App", "程序已启动");
         debug!("App::new()", "初始化 GLFW ...");
@@ -135,6 +156,7 @@ impl App {
         }
     }
 
+    /// 启动事件循环
     pub fn exec(&mut self) {
         debug!("App::exec()", "启动事件循环 ...");
         while let Ok(()) = self.rx.recv() {
@@ -146,6 +168,7 @@ impl App {
         debug!("App::exec()", "事件循环已退出");
     }
 
+    /// 获取当前帧率
     pub fn get_fps(&self) -> u32 {
         self.fps
     }

@@ -68,6 +68,7 @@ use lazy_static::lazy_static;
 
 use crate::{warn, RustCraftWrapper};
 lazy_static! {
+    /// 纹理资源管理器
     pub static ref TEXTURE_MANAGER: RustCraftWrapper<TextureManager> =
         RustCraftWrapper::new(TextureManager::new());
 }

@@ -31,6 +31,15 @@ mod vec;
 pub use mat::*;
 pub use vec::*;
 
+/// 生成二维平移矩阵
+/// 
+/// # 示例 Examples
+/// 
+/// ```
+/// use rustcraft::utils::tranlate2;
+/// 
+/// let mat = tranlate2(1.0, 2.0);
+/// ```
 pub fn tranlate2<T: Copy + From<f32>>(x: T, y: T) -> Mat3<T> {
     let mut mat = Mat3::<T>::new();
     mat[0][2] = x;
@@ -38,6 +47,15 @@ pub fn tranlate2<T: Copy + From<f32>>(x: T, y: T) -> Mat3<T> {
     mat
 }
 
+/// 生成二维缩放矩阵
+/// 
+/// # 示例 Examples
+/// 
+/// ```
+/// use rustcraft::utils::scale2;
+/// 
+/// let mat = scale2(2.0, 3.0);
+/// ```
 pub fn scale2<T: Copy + From<f32>>(x: T, y: T) -> Mat3<T> {
     let mut mat = Mat3::<T>::default();
     mat[0][0] = x;
@@ -45,6 +63,15 @@ pub fn scale2<T: Copy + From<f32>>(x: T, y: T) -> Mat3<T> {
     mat
 }
 
+/// 生成二维旋转矩阵
+/// 
+/// # 示例 Examples
+/// 
+/// ```
+/// use rustcraft::utils::rotate2;
+/// 
+/// let mat = rotate2(90.0);
+/// ```
 pub fn rotate2(angle: f32) -> Mat3<f32> {
     let mut mat = Mat3::<f32>::default();
     let c: f32 = f32::cos(angle);
@@ -56,6 +83,15 @@ pub fn rotate2(angle: f32) -> Mat3<f32> {
     mat
 }
 
+/// 生成三维平移矩阵
+/// 
+/// # 示例 Examples
+/// 
+/// ```
+/// use rustcraft::utils::tranlate3;
+/// 
+/// let mat = tranlate3(1.0, 2.0, 3.0);
+/// ```
 pub fn tranlate3<T: Copy + From<f32>>(x: T, y: T, z: T) -> Mat4<T> {
     let mut mat = Mat4::<T>::new();
     mat[0][3] = x;
@@ -64,6 +100,15 @@ pub fn tranlate3<T: Copy + From<f32>>(x: T, y: T, z: T) -> Mat4<T> {
     mat
 }
 
+/// 生成三维缩放矩阵
+/// 
+/// # 示例 Examples
+/// 
+/// ```
+/// use rustcraft::utils::scale3;
+/// 
+/// let mat = scale3(2.0, 3.0, 4.0);
+/// ```
 pub fn scale3<T: Copy + From<f32>>(x: T, y: T, z: T) -> Mat4<T> {
     let mut mat = Mat4::<T>::default();
     mat[0][0] = x;
@@ -72,6 +117,21 @@ pub fn scale3<T: Copy + From<f32>>(x: T, y: T, z: T) -> Mat4<T> {
     mat
 }
 
+/// 生成三维旋转矩阵
+/// 
+/// # 参数 Parameters
+/// 
+/// - `angle` - 旋转角度(弧度制)
+/// - `axis` - 旋转轴
+/// 
+/// # 示例 Examples
+/// 
+/// ```
+/// use rustcraft::utils::rotate3;
+/// use rustcraft::utils::Vec3;
+/// 
+/// let mat = rotate3(90.0, Vec3::new(1.0, 0.0, 0.0));
+/// ```
 pub fn rotate3(angle: f32, axis: Vec3<f32>) -> Mat4<f32> {
     let mut result = Mat4::<f32>::new();
     let s = angle.sin();

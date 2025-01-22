@@ -1,5 +1,6 @@
 use colored::*;
 
+/// 日志级别标志
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Level {
     Debug,
@@ -8,6 +9,7 @@ pub enum Level {
     Error,
 }
 
+/// 日志记录器
 struct Logger {
     level: Level,
     file: Option<String>,
@@ -104,12 +106,16 @@ lazy_static! {
 pub struct Log;
 
 impl Log {
+    /// 设置日志级别
+    /// 默认情况下，日志级别为 `Info`
     pub fn set_level(level: Level) {
         LOGGER.apply(|logger| {
             logger.set_level(level);
         });
     }
 
+    /// 设置日志输出文件
+    /// 默认情况下，日志输出到控制台
     pub fn set_file(file: Option<String>) {
         LOGGER.apply(|logger| {
             logger.set_file(file);
@@ -117,12 +123,14 @@ impl Log {
     }
 }
 
+/// 日志输出函数
 pub fn log(level: Level, owner: &str, message: &str) {
     LOGGER.apply(|logger| {
         logger.log(level, owner, message);
     });
 }
 
+/// 日志输出宏
 #[macro_export]
 macro_rules! debug {
     ($owner:expr, $($arg:tt)*) => {
@@ -130,6 +138,7 @@ macro_rules! debug {
     };
 }
 
+/// 日志输出宏
 #[macro_export]
 macro_rules! info {
     ($owner:expr, $($arg:tt)*) => {
@@ -137,6 +146,7 @@ macro_rules! info {
     };
 }
 
+/// 日志输出宏
 #[macro_export]
 macro_rules! warn {
     ($owner:expr, $($arg:tt)*) => {
@@ -144,6 +154,7 @@ macro_rules! warn {
     };
 }
 
+/// 日志输出宏
 #[macro_export]
 macro_rules! error {
     ($owner:expr, $($arg:tt)*) => {
