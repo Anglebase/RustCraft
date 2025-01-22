@@ -4,21 +4,26 @@ use lazy_static::lazy_static;
 use std::{
     sync::mpsc::{channel, Receiver},
     thread::spawn,
+    time::Instant,
 };
 lazy_static! {
     static ref RENDER_INIT_FUNC: RustCraftWrapper<Option<Box<dyn FnOnce() + Send + 'static>>> =
         RustCraftWrapper::new(None);
     static ref RENDER_LOOP_FUNC: RustCraftWrapper<Option<Box<dyn FnMut() + Send + 'static>>> =
         RustCraftWrapper::new(None);
+    static ref KEY_CALLBACK: RustCraftWrapper<
+        Option<Box<dyn FnMut(&mut Window, Key, i32, Action, Modifiers) + Send + 'static>>,
+    > = RustCraftWrapper::new(None);
+    static ref EVENT_CALLBACK: RustCraftWrapper<Option<Box<dyn FnMut(&mut Window) + Send + 'static>>> =
+        RustCraftWrapper::new(None);
+    static ref DELTA_TIME: RustCraftWrapper<f32> = RustCraftWrapper::new(0.0);
+    static ref UNIQUE_APP: RustCraftWrapper<Option<()>> = RustCraftWrapper::new(None);
+    static ref APP_TIME: RustCraftWrapper<Instant> = RustCraftWrapper::new(Instant::now());
 }
-
-mod events;
 
 pub struct App {
     glfw: Glfw,
     rx: Receiver<()>,
-    dt_rx: Receiver<f32>,
-    dt: f32,
 }
 
 impl App {
@@ -49,6 +54,33 @@ impl App {
         });
     }
 
+    /// 设置键盘事件回调函数
+    ///
+    /// # 注解 Note
+    /// 此函数应在 `App::new()` 之前调用
+    pub fn set_key_callback<F>(func: F)
+    where
+        F: FnMut(&mut Window, Key, i32, Action, Modifiers) + Send + 'static,
+    {
+        KEY_CALLBACK.apply(|data| {
+            *data = Some(Box::new(func));
+        });
+    }
+
+    /// 设置事件轮询函数
+    ///
+    /// # 注解 Note
+    /// + 此函数应在 `App::new()` 之前调用
+    /// + 该函数在渲染线程执行，每一帧都会被调用一次
+    pub fn set_event_callback<F>(func: F)
+    where
+        F: FnMut(&mut Window) + Send + 'static,
+    {
+        EVENT_CALLBACK.apply(|data| {
+            *data = Some(Box::new(func));
+        });
+    }
+
     /// 执行应用程序初始化
     ///
     /// # 参数 Parameters
@@ -61,6 +93,12 @@ impl App {
     ///
     /// # 注解 Note
     pub fn new(width: u32, height: u32, title: &str) -> Self {
+        UNIQUE_APP.apply(|data| {
+            if data.is_some() {
+                panic!("只能创建一个 App 实例！");
+            }
+            *data = Some(());
+        });
         info!("App", "程序已启动");
         debug!("App::new()", "初始化 GLFW ...");
         let mut glfw = if let Ok(glfw) = init(fail_on_errors) {
@@ -70,6 +108,7 @@ impl App {
             panic!("初始化 GLFW 失败！");
         };
         glfw.window_hint(WindowHint::Visible(false));
+
         let mut window = if let Some((window, _)) =
             glfw.create_window(width, height, title, WindowMode::Windowed)
         {
@@ -79,14 +118,18 @@ impl App {
             panic!("创建 GLFW 窗口失败！");
         };
         debug!("App::new()", "初始化 GLFW 窗口 ...");
-        window.set_key_callback(events::key_callback);
+        KEY_CALLBACK.apply(|data| {
+            if data.is_some() {
+                let func = data.take().unwrap();
+                window.set_key_callback(func);
+            }
+        });
         let (size_tx, size_rx) = channel();
         window.set_size_callback(move |_, w, h| {
             size_tx.send((w, h)).unwrap();
         });
         debug!("App::new()", "启动 GLFW 渲染线程 ...");
         let (tx, rx) = channel();
-        let (dt_tx, dt_rx) = channel();
         let (initialized_tx, initialized_rx) = channel();
         let (return_tx, return_rx) = channel();
         spawn(move || {
@@ -116,7 +159,9 @@ impl App {
                 // 计算此帧渲染时间
                 let dt = now.elapsed().as_secs_f32();
                 now = std::time::Instant::now();
-                dt_tx.send(dt).unwrap();
+                DELTA_TIME.apply(|data| {
+                    *data = dt;
+                });
                 // 更新窗口尺寸
                 if let Ok((w, h)) = size_rx.try_recv() {
                     unsafe { gl::Viewport(0, 0, w as i32, h as i32) }
@@ -128,6 +173,12 @@ impl App {
                     }
                 });
                 window.swap_buffers();
+                // 处理事件
+                EVENT_CALLBACK.apply(|data| {
+                    if let Some(func) = data.as_mut() {
+                        func(&mut window);
+                    }
+                });
             }
             debug!("App::new()/render", "渲染线程已退出");
             info!("App", "程序即将退出");
@@ -142,12 +193,7 @@ impl App {
         }
         debug!("App::new()", "GLFW 渲染线程已初始化");
 
-        Self {
-            glfw,
-            rx,
-            dt_rx,
-            dt: 0.0,
-        }
+        Self { glfw, rx }
     }
 
     /// 启动事件循环
@@ -155,22 +201,34 @@ impl App {
         debug!("App::exec()", "启动事件循环 ...");
         while let Ok(()) = self.rx.recv() {
             self.glfw.poll_events();
-            if let Ok(dt) = self.dt_rx.try_recv() {
-                self.dt = dt;
-            }
         }
         debug!("App::exec()", "事件循环已退出");
     }
 
-    /// 获取当前帧率
-    pub fn get_fps(&self) -> f32 {
-        if self.dt == 0.0 {
-            return 0.0;
-        }
-        1.0 / self.dt
+    /// 获取当前渲染帧率
+    pub fn fps() -> f32 {
+        let mut fps = 0.0;
+        DELTA_TIME.apply(|data| {
+            fps = 1.0 / *data;
+        });
+        fps
     }
 
-    pub fn get_delta_time(&self) -> f32 {
-        self.dt
+    /// 获取当前帧渲染时间
+    pub fn delta_time() -> f32 {
+        let mut dt = 0.0;
+        DELTA_TIME.apply(|data| {
+            dt = *data;
+        });
+        dt
+    }
+
+    /// 获取程序运行时间
+    pub fn time() -> f32 {
+        let mut t = 0.0;
+        APP_TIME.apply(|data| {
+            t = data.elapsed().as_secs_f32();
+        });
+        t
     }
 }

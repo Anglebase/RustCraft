@@ -22,16 +22,8 @@ fn render_loop() {
     );
     let proj = perspective(radian(45.0), 800.0 / 600.0, 0.1, 100.0);
 
-    let time = std::time::SystemTime::now();
-    let ms = (time
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_millis()
-        % 100000000) as f32
-        / 10.0;
-
     let shader = SHADER_MANAGER.get("face").unwrap();
-    let model: Mat4<f32> = rotate3(radian(ms), Vec3::new(0.0, -1.0, -1.0));
+    let model: Mat4<f32> = rotate3(radian(App::time() * 100.0), Vec3::new(0.0, -1.0, -1.0));
     let model = tranlate3(0.0, -0.5, 0.0) * model;
     shader.use_program();
     shader.set_uniform("trans", model);

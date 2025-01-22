@@ -1,5 +1,17 @@
+use glfw::*;
 use rustcraft::{debug, log::*, utils::Mat4, *};
 use utils::{look_at, radian, rotate3, tranlate3, Vec3};
+
+pub fn key_callback(window: &mut Window, key: Key, scancode: i32, action: Action, mods: Modifiers) {
+    match (key, action) {
+        (Key::Escape, Action::Press) => {
+            debug!("Events", "ESC 被按下，程序将退出");
+            window.set_should_close(true)
+        }
+        _ => {}
+    }
+    let _ = (window, key, scancode, action, mods);
+}
 
 fn render_init() {
     debug!("render::init()", "正在载入着色器...");
@@ -25,16 +37,8 @@ fn render_loop() {
     );
     let proj = perspective(radian(45.0), 800.0 / 600.0, 0.1, 100.0);
 
-    let time = std::time::SystemTime::now();
-    let ms = (time
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap()
-        .as_millis()
-        % 100000000) as f32
-        / 10.0;
-
     let shader = SHADER_MANAGER.get("cube").unwrap();
-    let model: Mat4<f32> = rotate3(radian(ms), Vec3::new(1.0, 1.0, 0.0));
+    let model: Mat4<f32> = rotate3(radian(App::time() * 100.0), Vec3::new(1.0, 1.0, 0.0));
     let model = tranlate3(0.0, 0.0, -1.0) * model;
     shader.use_program();
     shader.set_uniform("model", model);
@@ -49,6 +53,7 @@ fn main() {
     Log::set_level(Level::Debug);
     App::set_render_init_callback(render_init);
     App::set_render_loop_callback(render_loop);
+    App::set_key_callback(key_callback);
     let mut app = App::new(800, 600, "RustCraft");
     app.exec();
 }
