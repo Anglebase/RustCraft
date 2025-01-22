@@ -14,7 +14,7 @@ impl TextureManager {
         }
     }
 
-    pub fn init(&mut self, dir: &str) {
+    pub fn load_from(&mut self, dir: &str) {
         use std::fs::*;
         let entries = if let Ok(entries) = read_dir(dir) {
             entries
@@ -75,7 +75,7 @@ lazy_static! {
 impl RustCraftWrapper<TextureManager> {
     pub fn load_from(&self, dir: &str) {
         debug!("RCW<TextureManager>", "正在从 {} 加载纹理", dir);
-        self.apply(|tm| tm.init(dir));
+        self.apply(|tm| tm.load_from(dir));
     }
 
     pub fn bind(&self, name: &str, id: u32) {

@@ -1,13 +1,18 @@
+use crate::{debug, error, info, RustCraftWrapper};
+use glfw::*;
+use lazy_static::lazy_static;
 use std::{
     sync::mpsc::{channel, Receiver},
     thread::spawn,
 };
+lazy_static! {
+    static ref RENDER_INIT_FUNC: RustCraftWrapper<Option<Box<dyn FnOnce() + Send + 'static>>> =
+        RustCraftWrapper::new(None);
+    static ref RENDER_LOOP_FUNC: RustCraftWrapper<Option<Box<dyn FnMut() + Send + 'static>>> =
+        RustCraftWrapper::new(None);
+}
 
 mod events;
-mod render;
-
-use crate::{debug, error, info};
-use glfw::*;
 
 pub struct App {
     glfw: Glfw,
@@ -17,6 +22,23 @@ pub struct App {
 }
 
 impl App {
+    pub fn set_render_init_callback<F>(func: F)
+    where
+        F: FnOnce() + Send + 'static,
+    {
+        RENDER_INIT_FUNC.apply(|data| {
+            *data = Some(Box::new(func));
+        });
+    }
+    pub fn set_render_loop_callback<F>(func: F)
+    where
+        F: FnMut() + Send + 'static,
+    {
+        RENDER_LOOP_FUNC.apply(|data| {
+            *data = Some(Box::new(func));
+        });
+    }
+
     pub fn new(width: u32, height: u32, title: &str) -> Self {
         info!("App", "程序已启动");
         debug!("App::new()", "初始化 GLFW ...");
@@ -55,7 +77,12 @@ impl App {
             gl::Viewport::load_with(|symbol| window.get_proc_address(symbol) as *const _);
             debug!("App::new()/render", "初始化渲染依赖 ...");
             // 初始化渲染依赖
-            render::init();
+            RENDER_INIT_FUNC.apply(|data| {
+                if data.is_some() {
+                    let func = data.take().unwrap();
+                    func();
+                }
+            });
             // 暂时借出所有权
             initialized_tx.send(window).unwrap();
             let mut window: PWindow = return_rx.recv().unwrap();
@@ -80,7 +107,11 @@ impl App {
                     unsafe { gl::Viewport(0, 0, w as i32, h as i32) }
                 }
                 // 渲染
-                render::render();
+                RENDER_LOOP_FUNC.apply(|data| {
+                    if let Some(func) = data.as_mut() {
+                        func();
+                    }
+                });
                 window.swap_buffers();
             }
             debug!("App::new()/render", "渲染线程已退出");
