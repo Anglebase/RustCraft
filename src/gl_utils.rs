@@ -167,5 +167,10 @@ pub unsafe fn set_uniform<T: SetUniform>(
         return Err(format!("未找到 uniform 变量: {}", name));
     }
     value.give(local);
-    Ok(())
+    let err = gl::GetError();
+    match err {
+        gl::NO_ERROR => Ok(()),
+        gl::INVALID_OPERATION => Err(format!("此次设置 uniform 变量 {} 为无效操作", name)),
+        _ => Err(format!("未能设置 uniform 变量: {}, 错误码: {}", name, err)),
+    }
 }

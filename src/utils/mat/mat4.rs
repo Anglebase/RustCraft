@@ -1,4 +1,4 @@
-use crate::{impl_mat_mul_mat, impl_mat_ops_add, impl_mat_ops_mul_number, impl_mat_ops_sub, utils::SetUniform};
+use crate::{impl_mat_index, impl_mat_mul_mat, impl_mat_ops_add, impl_mat_ops_mul_number, impl_mat_ops_sub, utils::SetUniform};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Mat4<T> {
@@ -29,7 +29,7 @@ impl<T: From<f32> + Copy> Default for Mat4<T> {
 impl SetUniform for Mat4<f32> {
     fn give(&self, location: i32) {
         unsafe {
-            gl::UniformMatrix3fv(location, 1, gl::TRUE, &self.data[0][0]);
+            gl::UniformMatrix4fv(location, 1, gl::TRUE, &self.data[0][0]);
         }
     }
 }
@@ -37,7 +37,7 @@ impl SetUniform for Mat4<f32> {
 impl SetUniform for Mat4<f64> {
     fn give(&self, location: i32) {
         unsafe {
-            gl::UniformMatrix3dv(location, 1, gl::TRUE, &self.data[0][0]);
+            gl::UniformMatrix4dv(location, 1, gl::TRUE, &self.data[0][0]);
         }
     }
 }
@@ -46,3 +46,4 @@ impl_mat_ops_add!(Mat4<T>, 4, 4);
 impl_mat_ops_sub!(Mat4<T>, 4, 4);
 impl_mat_ops_mul_number!(Mat4<T>, 4, 4);
 impl_mat_mul_mat!(Mat4<T>, 4, 4);
+impl_mat_index!(Mat4<T>, 4, 4);

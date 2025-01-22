@@ -102,3 +102,22 @@ macro_rules! impl_mat_mul_mat {
         $crate::impl_mat_mul_mat!($type, $rows, $cols, $type, $rows, $cols, $type);
     };
 }
+
+#[macro_export]
+macro_rules! impl_mat_index {
+    ($type:ty, $rows:expr, $cols:expr) => {
+        impl<T> std::ops::Index<usize> for $type {
+            type Output = [T; $cols];
+
+            fn index(&self, index: usize) -> &Self::Output {
+                &self.data[index]
+            }
+        }
+
+        impl<T> std::ops::IndexMut<usize> for $type {
+            fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+                &mut self.data[index]
+            }
+        }
+    };
+}
