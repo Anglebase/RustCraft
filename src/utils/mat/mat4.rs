@@ -1,0 +1,44 @@
+use crate::utils::SetUniform;
+
+pub struct Mat4<T> {
+    data: [[T; 4]; 4],
+}
+
+impl<T: From<f32>> Mat4<T> {
+    pub fn new() -> Self {
+        Self {
+            data: [
+                [1.0.into(), 0.0.into(), 0.0.into(), 0.0.into()],
+                [0.0.into(), 1.0.into(), 0.0.into(), 0.0.into()],
+                [0.0.into(), 0.0.into(), 1.0.into(), 0.0.into()],
+                [0.0.into(), 0.0.into(), 0.0.into(), 1.0.into()],
+            ],
+        }
+    }
+    pub fn zero() -> Self {
+        Self {
+            data: [
+                [0.0.into(), 0.0.into(), 0.0.into(), 0.0.into()],
+                [0.0.into(), 0.0.into(), 0.0.into(), 0.0.into()],
+                [0.0.into(), 0.0.into(), 0.0.into(), 0.0.into()],
+                [0.0.into(), 0.0.into(), 0.0.into(), 0.0.into()],
+            ],
+        }
+    }
+}
+
+impl SetUniform for Mat4<f32> {
+    fn give(&self, location: i32) {
+        unsafe {
+            gl::UniformMatrix3fv(location, 1, gl::TRUE, &self.data[0][0]);
+        }
+    }
+}
+
+impl SetUniform for Mat4<f64> {
+    fn give(&self, location: i32) {
+        unsafe {
+            gl::UniformMatrix3dv(location, 1, gl::TRUE, &self.data[0][0]);
+        }
+    }
+}
