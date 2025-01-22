@@ -155,3 +155,24 @@ pub fn rotate3(angle: f32, axis: Vec3<f32>) -> Mat4<f32> {
 pub fn radian(angle: f32) -> f32 {
     angle * std::f32::consts::PI / 180.0
 }
+
+pub fn look_at(eye: Vec3<f32>, target: Vec3<f32>, up: Vec3<f32>) -> Mat4<f32> {
+    let z = (eye - target).normalize(); // 计算z轴方向向量
+    let x = up.cross(z).normalize(); // 计算x轴方向向量
+    let y = z.cross(x); // 计算y轴方向向量
+
+    let translation = [
+        [1.0, 0.0, 0.0, -eye.x],
+        [0.0, 1.0, 0.0, -eye.y],
+        [0.0, 0.0, 1.0, -eye.z],
+        [0.0, 0.0, 0.0, 1.0],
+    ];
+    let rotation = [
+        [x.x, x.y, x.z, 0.0],
+        [y.x, y.y, y.z, 0.0],
+        [z.x, z.y, z.z, 0.0],
+        [0.0, 0.0, 0.0, 1.0],
+    ];
+
+    Mat4::from(translation) * Mat4::from(rotation)
+}

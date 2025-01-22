@@ -1,5 +1,5 @@
 use rustcraft::{debug, log::*, utils::Mat4, *};
-use utils::{radian, rotate3, Vec3};
+use utils::{look_at, radian, rotate3, Vec3};
 
 fn render_init() {
     debug!("render::init()", "正在载入着色器...");
@@ -22,8 +22,16 @@ fn render_loop() {
 
         let shader = SHADER_MANAGER.get("test").unwrap();
         shader.use_program();
-        let mat4: Mat4<f32> = rotate3(radian(45.0), Vec3::new(0.0, 1.0, 0.0));
-        shader.set_uniform("trans", mat4);
+        let view = look_at(
+            Vec3::new(0.0, 0.0, 3.0),
+            Vec3::new(0.0, 0.0, 0.0),
+            Vec3::new(0.0, 1.0, 0.0),
+        );
+        let trans: Mat4<f32> = rotate3(radian(45.0), Vec3::new(0.0, -1.0, -1.0));
+        let proj = perspective(radian(45.0), 800.0 / 600.0, 0.1, 100.0);
+        shader.set_uniform("trans", trans);
+        shader.set_uniform("view", view);
+        shader.set_uniform("proj", proj);
         TEXTURE_MANAGER.bind("container2", 0);
         MODEL_MANAGER.draw_model("Face");
     }

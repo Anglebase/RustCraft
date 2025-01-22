@@ -8,10 +8,11 @@ mod shader;
 mod texture;
 pub mod utils;
 
+pub use app::App;
 pub use model::MODEL_MANAGER;
 pub use shader::SHADER_MANAGER;
 pub use texture::TEXTURE_MANAGER;
-pub use app::App;
+use utils::Mat4;
 
 /// 全局对象包装器，它利用 Mutex 的内部可变性实现全局对象的简洁访问
 pub struct RustCraftWrapper<T> {
@@ -27,23 +28,23 @@ impl<T> RustCraftWrapper<T> {
 
     /// 向内部数据应用一个函数
     /// 该函数接收内部数据的可变引用，允许对其进行修改
-    /// 
+    ///
     /// # 参数 Parameters
     /// - `f`: 一个函数，接收内部数据的可变引用作为参数
-    /// 
+    ///
     /// # 注解 Note
     /// 在运行函数的过程中，互斥锁处于锁定状态，直至函数执行完毕；
     /// 在函数内不应再次调用此函数，否则会导致死锁
-    /// 
+    ///
     /// # 示例 Examples
     /// ```
     /// use rustcraft::RustCraftWrapper;
     /// use lazy_static::lazy_static;
-    /// 
+    ///
     /// lazy_static! {
     ///     static ref RUSTCRAFT: RustCraftWrapper<i32> = RustCraftWrapper::new(42);
     /// }
-    /// 
+    ///
     /// fn main() {
     ///     RUSTCRAFT.apply(|data| {
     ///         *data += 1;
@@ -89,4 +90,17 @@ mod tests {
         });
         assert_eq!(s, 42);
     }
+}
+
+pub fn perspective(angle: f32, aspect: f32, z_near: f32, z_far: f32) -> Mat4<f32> {
+    let f = 1.0 / (angle / 2.0).tan();
+    let mut result = [[0.0; 4]; 4];
+
+    result[0][0] = f / aspect;
+    result[1][1] = f;
+    result[2][2] = (z_far + z_near) / (z_near - z_far);
+    result[2][3] = (2.0 * z_far * z_near) / (z_near - z_far);
+    result[3][2] = -1.0;
+
+    Mat4::<f32>::from(result)
 }

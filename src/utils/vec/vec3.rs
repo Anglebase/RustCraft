@@ -20,6 +20,23 @@ impl<T: Copy + Into<f32>> Vec3<T> {
     pub fn length(&self) -> f32 {
         (*self * *self).sqrt().into()
     }
+
+    pub fn normalize(&self) -> Vec3<f32> {
+        let len = self.length();
+        Vec3 {
+            x: (self.x.into() / len).into(),
+            y: (self.y.into() / len).into(),
+            z: (self.z.into() / len).into(),
+        }
+    }
+
+    pub fn cross(&self, other: Vec3<T>) -> Vec3<f32> {
+        Vec3 {
+            x: (self.y.into() * other.z.into() - self.z.into() * other.y.into()).into(),
+            y: (self.z.into() * other.x.into() - self.x.into() * other.z.into()).into(),
+            z: (self.x.into() * other.y.into() - self.y.into() * other.x.into()).into(),
+        }
+    }
 }
 
 impl SetUniform for Vec3<f32> {
