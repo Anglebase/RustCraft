@@ -3,7 +3,7 @@ use gl::types::*;
 use shader::Shader;
 use std::collections::{HashMap, HashSet};
 
-mod gl_utils;
+pub(crate) mod gl_utils;
 mod shader;
 
 pub struct ShaderManager {
@@ -18,7 +18,7 @@ impl ShaderManager {
     }
 
     fn load_from(&mut self, path: &str) {
-        debug!("ShaderManager::load_from()", "正在从 {} 加载着色器", path);
+        debug!("ShaderManager", "正在从 {} 加载着色器", path);
         // 顶点着色器文件扩展名集合
         let vert_ext = {
             let mut set = HashSet::new();
@@ -38,7 +38,7 @@ impl ShaderManager {
             Ok(dir) => dir,
             Err(e) => {
                 warn!(
-                    "ShaderManager::load_from()",
+                    "ShaderManager",
                     "无法读取指定目录: {}, 由于 \"{}\"", path, e
                 );
                 return;
@@ -51,7 +51,7 @@ impl ShaderManager {
                 Ok(entry) => entry,
                 Err(e) => {
                     warn!(
-                        "ShaderManager::load_from()",
+                        "ShaderManager",
                         "遍历项目出现错误，由于 \"{}\"", e
                     );
                     continue;
@@ -63,7 +63,7 @@ impl ShaderManager {
                 Ok(content) => content,
                 Err(e) => {
                     warn!(
-                        "ShaderManager::load_from()",
+                        "ShaderManager",
                         "无法读取文件: {}, 由于 \"{}\"",
                         path.display(),
                         e
@@ -72,7 +72,7 @@ impl ShaderManager {
                 }
             };
             debug!(
-                "ShaderManager::load_from()",
+                "ShaderManager",
                 "检索到文件: {}",
                 path.display()
             );
@@ -81,7 +81,7 @@ impl ShaderManager {
                 ext.to_str().unwrap()
             } else {
                 info!(
-                    "ShaderManager::load_from()",
+                    "ShaderManager",
                     "忽略未知文件: {}",
                     path.display()
                 );
@@ -92,7 +92,7 @@ impl ShaderManager {
                 ext.to_str().unwrap()
             } else {
                 info!(
-                    "ShaderManager::load_from()",
+                    "ShaderManager",
                     "忽略未知文件: {}",
                     path.display()
                 );
@@ -101,14 +101,14 @@ impl ShaderManager {
             // 标记着色器
             if vert_ext.contains(ext) {
                 debug!(
-                    "ShaderManager::load_from()",
+                    "ShaderManager",
                     "顶点着色器: {}",
                     path.display()
                 );
                 vert_codes.insert(filename.to_string(), content);
             } else if frag_ext.contains(ext) {
                 debug!(
-                    "ShaderManager::load_from()",
+                    "ShaderManager",
                     "片段着色器: {}",
                     path.display()
                 );
@@ -122,20 +122,20 @@ impl ShaderManager {
         let frag_set_ignore = frag_set.difference(&vert_set);
         for path in vert_set_ignore {
             warn!(
-                "ShaderManager::load_from()",
+                "ShaderManager",
                 "顶点着色器未找到匹配的片段着色器: {}", path
             );
         }
         for path in frag_set_ignore {
             warn!(
-                "ShaderManager::load_from()",
+                "ShaderManager",
                 "片段着色器未找到匹配的顶点着色器: {}", path
             );
         }
         vert_codes.retain(|path, _| frag_set.contains(path));
         frag_codes.retain(|path, _| vert_set.contains(path));
         // 编译着色器
-        info!("ShaderManager::load_from()", "正在编译着色器...");
+        info!("ShaderManager", "正在编译着色器...");
         let mut vert_shader = HashMap::new();
         let mut frag_shader = HashMap::new();
         for (path, code) in vert_codes {
@@ -143,7 +143,7 @@ impl ShaderManager {
                 Ok(shader) => Some(shader),
                 Err(e) => {
                     warn!(
-                        "ShaderManager::load_from()",
+                        "ShaderManager",
                         "顶点着色器\"{}\"编译失败, 由于 \"{}\"", path, e
                     );
                     None
@@ -156,7 +156,7 @@ impl ShaderManager {
                 Ok(shader) => Some(shader),
                 Err(e) => {
                     warn!(
-                        "ShaderManager::load_from()",
+                        "ShaderManager",
                         "片段着色器\"{}\"编译失败, 由于 \"{}\"", path, e
                     );
                     None
@@ -173,27 +173,27 @@ impl ShaderManager {
         let frag_set_ignore = frag_set.difference(&vert_set);
         for path in vert_set_ignore {
             warn!(
-                "ShaderManager::load_from()",
+                "ShaderManager",
                 "没有与\"{}\"匹配的片段着色器", path
             );
         }
         for path in frag_set_ignore {
             warn!(
-                "ShaderManager::load_from()",
+                "ShaderManager",
                 "没有与\"{}\"匹配的顶点着色器", path
             );
         }
         vert_shader.retain(|path, shader| frag_set.contains(path) && shader.is_some());
         frag_shader.retain(|path, shader| vert_set.contains(path) && shader.is_some());
         // 链接着色器
-        info!("ShaderManager::load_from()", "正在链接着色器...");
+        info!("ShaderManager", "正在链接着色器...");
         for (path, vert) in vert_shader {
             let frag = frag_shader.get(&path).unwrap().unwrap();
             let program = match unsafe { gl_utils::link_program(vert.unwrap(), frag) } {
                 Ok(program) => program,
                 Err(e) => {
                     warn!(
-                        "ShaderManager::load_from()",
+                        "ShaderManager",
                         "着色器\"{}\"链接失败, 由于 \"{}\"", path, e
                     );
                     continue;

@@ -6,7 +6,7 @@ use std::{
 mod events;
 mod render;
 
-use crate::{debug, error};
+use crate::{debug, error, info};
 use glfw::*;
 
 pub struct App {
@@ -18,6 +18,7 @@ pub struct App {
 
 impl App {
     pub fn new(width: u32, height: u32, title: &str) -> Self {
+        info!("App", "程序已启动");
         debug!("App::new()", "初始化 GLFW ...");
         let mut glfw = if let Ok(glfw) = init(fail_on_errors) {
             glfw

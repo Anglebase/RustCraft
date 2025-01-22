@@ -3,6 +3,7 @@ use std::sync::Mutex;
 pub mod log;
 pub mod app;
 pub mod shader;
+pub mod model;
 
 pub struct RustCraftWrapper<T> {
     data: Mutex<T>,
