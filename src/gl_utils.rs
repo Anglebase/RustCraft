@@ -1,6 +1,8 @@
 use gl::types::*;
 use std::ffi::CString;
 
+use crate::utils::SetUniform;
+
 pub unsafe fn complie_shader(shader_type: GLenum, source: &str) -> Result<GLuint, String> {
     let shader = gl::CreateShader(shader_type);
     let source = CString::new(source).unwrap();
@@ -149,4 +151,21 @@ pub unsafe fn load_texture_from_file(path: &str) -> Result<GLuint, Box<dyn std::
     gl::BindTexture(gl::TEXTURE_2D, 0);
 
     Ok(texture)
+}
+
+pub unsafe fn set_uniform<T: SetUniform>(
+    program: GLuint,
+    name: &str,
+    value: T,
+) -> Result<(), String> {
+    let c_name = match CString::new(name) {
+        Ok(name) => name,
+        Err(e) => return Err(format!("无效的 uniform 名称: {}", e)),
+    };
+    let local = gl::GetUniformLocation(program, c_name.as_ptr());
+    if local == -1 {
+        return Err(format!("未找到 uniform 变量: {}", name));
+    }
+    value.give(local);
+    Ok(())
 }

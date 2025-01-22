@@ -1,5 +1,6 @@
 use std::sync::Mutex;
 
+pub mod utils;
 pub mod log;
 pub mod app;
 pub mod shader;
