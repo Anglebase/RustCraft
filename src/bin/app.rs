@@ -1,4 +1,4 @@
-use rustcraft::{app::*, log::*, model::*, shader::*, texture::*, debug};
+use rustcraft::{app::*, debug, log::*, model::*, shader::*, texture::*};
 
 fn render_init() {
     debug!("render::init()", "正在载入着色器...");

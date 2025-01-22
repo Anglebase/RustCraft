@@ -1,12 +1,12 @@
 use std::sync::Mutex;
 
-pub mod utils;
-pub mod log;
 pub mod app;
-pub mod shader;
-pub mod model;
-pub mod texture;
 pub(crate) mod gl_utils;
+pub mod log;
+pub mod model;
+pub mod shader;
+pub mod texture;
+pub mod utils;
 
 pub struct RustCraftWrapper<T> {
     data: Mutex<T>,
