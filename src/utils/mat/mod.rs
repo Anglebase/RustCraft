@@ -57,3 +57,24 @@ macro_rules! impl_mat_ops_sub {
         }
     };
 }
+
+#[macro_export]
+macro_rules! impl_mat_ops_mul_number {
+    ($type:ty, $rows:expr, $cols:expr) => {
+        use std::ops::Mul;
+
+        impl<T: Copy + Mul<Output = T> + From<f32>> Mul<T> for $type {
+            type Output = Self;
+
+            fn mul(self, other: T) -> Self::Output {
+                let mut result = Self::default();
+                for i in 0..$rows {
+                    for j in 0..$cols {
+                        result.data[i][j] = self.data[i][j] * other;
+                    }
+                }
+                result
+            }
+        }
+    };
+}

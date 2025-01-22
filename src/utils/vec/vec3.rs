@@ -1,4 +1,4 @@
-use crate::{impl_vec_ops_add, impl_vec_ops_sub, utils::SetUniform};
+use crate::{impl_vec_ops_add, impl_vec_ops_mul_number, impl_vec_ops_sub, utils::SetUniform};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vec3<T> {
@@ -39,3 +39,4 @@ impl SetUniform for Vec3<u32> {
 
 impl_vec_ops_add!(Vec3<T>, x, y, z);
 impl_vec_ops_sub!(Vec3<T>, x, y, z);
+impl_vec_ops_mul_number!(Vec3<T>, x, y, z);

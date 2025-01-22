@@ -37,3 +37,19 @@ macro_rules! impl_vec_ops_sub {
         }
     };
 }
+
+#[macro_export]
+macro_rules! impl_vec_ops_mul_number {
+    ($type:ty, $($field:ident),+) => {
+        use std::ops::Mul;
+        impl<T: Mul<Output = T> + Copy> Mul<T> for $type {
+            type Output = Self;
+
+            fn mul(self, other: T) -> Self {
+                Self {
+                    $($field: self.$field * other,)+
+                }
+            }
+        }
+    };
+}

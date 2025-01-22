@@ -26,7 +26,7 @@ impl SetUniform for u32 {
     }
 }
 
-mod vec;
 mod mat;
-pub use vec::*;
+mod vec;
 pub use mat::*;
+pub use vec::*;
