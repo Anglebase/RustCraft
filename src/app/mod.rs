@@ -19,6 +19,7 @@ lazy_static! {
     static ref DELTA_TIME: RustCraftWrapper<f32> = RustCraftWrapper::new(0.0);
     static ref UNIQUE_APP: RustCraftWrapper<Option<()>> = RustCraftWrapper::new(None);
     static ref APP_TIME: RustCraftWrapper<Instant> = RustCraftWrapper::new(Instant::now());
+    static ref WINDOW_SIZE: RustCraftWrapper<(i32, i32)> = RustCraftWrapper::new((0, 0));
 }
 
 pub struct App {
@@ -127,6 +128,12 @@ impl App {
         let (size_tx, size_rx) = channel();
         window.set_size_callback(move |_, w, h| {
             size_tx.send((w, h)).unwrap();
+            WINDOW_SIZE.apply(|data| {
+                *data = (w, h);
+            });
+        });
+        WINDOW_SIZE.apply(|data| {
+            *data = (width as i32, height as i32);
         });
         debug!("App::new()", "启动 GLFW 渲染线程 ...");
         let (tx, rx) = channel();
@@ -230,5 +237,13 @@ impl App {
             t = data.elapsed().as_secs_f32();
         });
         t
+    }
+
+    pub fn window_size() -> (i32, i32) {
+        let mut size = (0, 0);
+        WINDOW_SIZE.apply(|data| {
+            size = *data;
+        });
+        size
     }
 }

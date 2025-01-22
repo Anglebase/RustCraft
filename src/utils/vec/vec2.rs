@@ -1,4 +1,7 @@
-use crate::{impl_vec_mul_vec, impl_vec_ops_add, impl_vec_ops_mul_number, impl_vec_ops_sub, utils::SetUniform};
+use crate::{
+    impl_vec_mul_vec, impl_vec_ops_add, impl_vec_ops_mul_number, impl_vec_ops_sub,
+    utils::SetUniform,
+};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vec2<T> {

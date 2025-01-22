@@ -1,6 +1,6 @@
 use glfw::*;
 use rustcraft::{debug, log::*, utils::Mat4, *};
-use utils::{look_at, radian, rotate3, tranlate3, Vec3};
+use utils::{look_at, perspective, radian, rotate3, tranlate3, Vec3};
 
 pub fn key_callback(window: &mut Window, key: Key, scancode: i32, action: Action, mods: Modifiers) {
     match (key, action) {
@@ -35,7 +35,8 @@ fn render_loop() {
         Vec3::new(0.0, 0.0, 0.0),
         Vec3::new(0.0, 1.0, 0.0),
     );
-    let proj = perspective(radian(45.0), 800.0 / 600.0, 0.1, 100.0);
+    let (w, h) = App::window_size();
+    let proj = perspective(radian(45.0), w as f32 / h as f32, 0.1, 100.0);
 
     let shader = SHADER_MANAGER.get("cube").unwrap();
     let model: Mat4<f32> = rotate3(radian(App::time() * 100.0), Vec3::new(1.0, 1.0, 0.0));
@@ -54,6 +55,6 @@ fn main() {
     App::set_render_init_callback(render_init);
     App::set_render_loop_callback(render_loop);
     App::set_key_callback(key_callback);
-    let mut app = App::new(800, 600, "RustCraft");
+    let mut app = App::new(800, 800, "RustCraft");
     app.exec();
 }

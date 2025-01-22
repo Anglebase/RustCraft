@@ -32,12 +32,12 @@ pub use mat::*;
 pub use vec::*;
 
 /// 生成二维平移矩阵
-/// 
+///
 /// # 示例 Examples
-/// 
+///
 /// ```
 /// use rustcraft::utils::tranlate2;
-/// 
+///
 /// let mat = tranlate2(1.0, 2.0);
 /// ```
 pub fn tranlate2<T: Copy + From<f32>>(x: T, y: T) -> Mat3<T> {
@@ -48,12 +48,12 @@ pub fn tranlate2<T: Copy + From<f32>>(x: T, y: T) -> Mat3<T> {
 }
 
 /// 生成二维缩放矩阵
-/// 
+///
 /// # 示例 Examples
-/// 
+///
 /// ```
 /// use rustcraft::utils::scale2;
-/// 
+///
 /// let mat = scale2(2.0, 3.0);
 /// ```
 pub fn scale2<T: Copy + From<f32>>(x: T, y: T) -> Mat3<T> {
@@ -64,12 +64,12 @@ pub fn scale2<T: Copy + From<f32>>(x: T, y: T) -> Mat3<T> {
 }
 
 /// 生成二维旋转矩阵
-/// 
+///
 /// # 示例 Examples
-/// 
+///
 /// ```
 /// use rustcraft::utils::rotate2;
-/// 
+///
 /// let mat = rotate2(90.0);
 /// ```
 pub fn rotate2(angle: f32) -> Mat3<f32> {
@@ -84,12 +84,12 @@ pub fn rotate2(angle: f32) -> Mat3<f32> {
 }
 
 /// 生成三维平移矩阵
-/// 
+///
 /// # 示例 Examples
-/// 
+///
 /// ```
 /// use rustcraft::utils::tranlate3;
-/// 
+///
 /// let mat = tranlate3(1.0, 2.0, 3.0);
 /// ```
 pub fn tranlate3<T: Copy + From<f32>>(x: T, y: T, z: T) -> Mat4<T> {
@@ -101,12 +101,12 @@ pub fn tranlate3<T: Copy + From<f32>>(x: T, y: T, z: T) -> Mat4<T> {
 }
 
 /// 生成三维缩放矩阵
-/// 
+///
 /// # 示例 Examples
-/// 
+///
 /// ```
 /// use rustcraft::utils::scale3;
-/// 
+///
 /// let mat = scale3(2.0, 3.0, 4.0);
 /// ```
 pub fn scale3<T: Copy + From<f32>>(x: T, y: T, z: T) -> Mat4<T> {
@@ -118,18 +118,18 @@ pub fn scale3<T: Copy + From<f32>>(x: T, y: T, z: T) -> Mat4<T> {
 }
 
 /// 生成三维旋转矩阵
-/// 
+///
 /// # 参数 Parameters
-/// 
+///
 /// - `angle` - 旋转角度(弧度制)
 /// - `axis` - 旋转轴
-/// 
+///
 /// # 示例 Examples
-/// 
+///
 /// ```
 /// use rustcraft::utils::rotate3;
 /// use rustcraft::utils::Vec3;
-/// 
+///
 /// let mat = rotate3(90.0, Vec3::new(1.0, 0.0, 0.0));
 /// ```
 pub fn rotate3(angle: f32, axis: Vec3<f32>) -> Mat4<f32> {
@@ -175,4 +175,17 @@ pub fn look_at(eye: Vec3<f32>, target: Vec3<f32>, up: Vec3<f32>) -> Mat4<f32> {
     ];
 
     Mat4::from(translation) * Mat4::from(rotation)
+}
+
+pub fn perspective(angle: f32, aspect: f32, z_near: f32, z_far: f32) -> Mat4<f32> {
+    let f = 1.0 / (angle / 2.0).tan();
+    let mut result = [[0.0; 4]; 4];
+
+    result[0][0] = f / aspect;
+    result[1][1] = f;
+    result[2][2] = (z_far + z_near) / (z_near - z_far);
+    result[2][3] = (2.0 * z_far * z_near) / (z_near - z_far);
+    result[3][2] = -1.0;
+
+    Mat4::<f32>::from(result)
 }

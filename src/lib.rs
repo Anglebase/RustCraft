@@ -12,7 +12,6 @@ pub use app::App;
 pub use model::MODEL_MANAGER;
 pub use shader::SHADER_MANAGER;
 pub use texture::TEXTURE_MANAGER;
-use utils::Mat4;
 
 /// 全局对象包装器，它利用 Mutex 的内部可变性实现全局对象的简洁访问
 pub struct RustCraftWrapper<T> {
@@ -90,17 +89,4 @@ mod tests {
         });
         assert_eq!(s, 42);
     }
-}
-
-pub fn perspective(angle: f32, aspect: f32, z_near: f32, z_far: f32) -> Mat4<f32> {
-    let f = 1.0 / (angle / 2.0).tan();
-    let mut result = [[0.0; 4]; 4];
-
-    result[0][0] = f / aspect;
-    result[1][1] = f;
-    result[2][2] = (z_far + z_near) / (z_near - z_far);
-    result[2][3] = (2.0 * z_far * z_near) / (z_near - z_far);
-    result[3][2] = -1.0;
-
-    Mat4::<f32>::from(result)
 }

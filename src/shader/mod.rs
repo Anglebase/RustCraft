@@ -185,14 +185,14 @@ lazy_static! {
 
 impl RustCraftWrapper<ShaderManager> {
     /// 加载指定目录下的着色器
-    /// 
+    ///
     /// # 注解 Note
-    /// 
+    ///
     /// 此函数只有在 OpenGL 上下文激活后才能调用
-    /// 
+    ///
     /// 从文件载入着色器时，只会保留同时具有成功编译后的顶点着色器和片段着色器的有效的着色器程序
     /// 此函数依据文件名对着色器进行配对，如果没有找到匹配的着色器，则会输出警告信息
-    /// 
+    ///
     /// # 参数 Parameters
     /// * `path` - 目录路径
     pub fn load_from(&self, path: &str) {
@@ -202,13 +202,13 @@ impl RustCraftWrapper<ShaderManager> {
     }
 
     /// 获取指定名称的着色器
-    /// 
+    ///
     /// # 注解 Note
     /// 着色器名称与着色器的源代码文件名一致
-    /// 
+    ///
     /// # 参数 Parameters
     /// * `name` - 着色器名称
-    /// 
+    ///
     /// # 返回值 Returns
     /// 成功获取着色器时返回 `Some(Shader)`，否则返回 `None`
     pub fn get(&self, name: &str) -> Option<Shader> {
