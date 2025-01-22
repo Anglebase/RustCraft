@@ -101,16 +101,20 @@ lazy_static! {
     static ref LOGGER: RustCraftWrapper<Logger> = RustCraftWrapper::new(Logger::new());
 }
 
-pub fn set_level(level: Level) {
-    LOGGER.apply(|logger| {
-        logger.set_level(level);
-    });
-}
+pub struct Log;
 
-pub fn set_file(file: Option<String>) {
-    LOGGER.apply(|logger| {
-        logger.set_file(file);
-    });
+impl Log {
+    pub fn set_level(level: Level) {
+        LOGGER.apply(|logger| {
+            logger.set_level(level);
+        });
+    }
+
+    pub fn set_file(file: Option<String>) {
+        LOGGER.apply(|logger| {
+            logger.set_file(file);
+        });
+    }
 }
 
 pub fn log(level: Level, owner: &str, message: &str) {
@@ -153,7 +157,7 @@ mod tests {
 
     #[test]
     fn test_log() {
-        set_level(Level::Debug);
+        Log::set_level(Level::Debug);
         debug!("test", "test message");
         info!("test", "test message");
         warn!("test", "test message");
@@ -162,7 +166,7 @@ mod tests {
 
     #[test]
     fn test_file() {
-        set_file(Some(r"out/log.txt".to_string()));
+        Log::set_file(Some(r"out/log.txt".to_string()));
         debug!("test", "test message");
         info!("test", "test message");
         warn!("test", "test message");

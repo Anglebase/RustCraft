@@ -26,7 +26,7 @@ fn render_loop() {
 }
 
 fn main() {
-    set_level(Level::Debug);
+    Log::set_level(Level::Debug);
     App::set_render_init_callback(render_init);
     App::set_render_loop_callback(render_loop);
     let mut app = App::new(800, 600, "RustCraft");
