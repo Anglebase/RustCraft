@@ -50,3 +50,23 @@ macro_rules! impl_vec_ops_mul_number {
         }
     };
 }
+
+#[macro_export]
+macro_rules! impl_vec_mul_vec {
+    ($type:ty, $($field:ident),+) => {
+        impl<T> std::ops::Mul for $type
+        where
+            T: Copy + Into<f32>,
+        {
+            type Output = f32;
+
+            fn mul(self, other: Self) -> Self::Output {
+                let mut result = 0.0;
+                $(
+                    result += self.$field.into() * other.$field.into();
+                )+
+                result
+            }
+        }
+    };
+}

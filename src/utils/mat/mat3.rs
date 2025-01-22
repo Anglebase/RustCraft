@@ -1,4 +1,7 @@
-use crate::{impl_mat_index, impl_mat_mul_mat, impl_mat_ops_add, impl_mat_ops_mul_number, impl_mat_ops_sub, utils::SetUniform};
+use crate::{
+    impl_mat_index, impl_mat_mul_mat, impl_mat_ops_add, impl_mat_ops_mul_number, impl_mat_ops_sub,
+    utils::SetUniform,
+};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Mat3<T> {
@@ -38,6 +41,12 @@ impl SetUniform for Mat3<f64> {
         unsafe {
             gl::UniformMatrix3dv(location, 1, gl::TRUE, &self.data[0][0]);
         }
+    }
+}
+
+impl<T> From<[[T; 3]; 3]> for Mat3<T> {
+    fn from(value: [[T; 3]; 3]) -> Self {
+        Self { data: value }
     }
 }
 

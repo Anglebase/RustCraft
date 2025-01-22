@@ -94,6 +94,7 @@ pub unsafe fn create_model_context(
             "f" => gl::FLOAT,
             "i" => gl::INT,
             "b" => gl::BOOL,
+            "_" => 0,
             _ => panic!("Invalid type id"),
         };
         layout.push((type_id, size, offset));
@@ -106,6 +107,9 @@ pub unsafe fn create_model_context(
     }
     let sum = offset;
     for (i, &(type_id, size, offset)) in layout.iter().enumerate() {
+        if type_id == 0 {
+            continue;
+        }
         gl::VertexAttribPointer(
             i as GLuint,
             size,

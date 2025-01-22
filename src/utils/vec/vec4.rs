@@ -1,4 +1,7 @@
-use crate::{impl_vec_ops_add, impl_vec_ops_mul_number, impl_vec_ops_sub, utils::SetUniform};
+use crate::{
+    impl_vec_mul_vec, impl_vec_ops_add, impl_vec_ops_mul_number, impl_vec_ops_sub,
+    utils::SetUniform,
+};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Vec4<T> {
@@ -11,6 +14,12 @@ pub struct Vec4<T> {
 impl Vec4<f32> {
     pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
         Self { x, y, z, w }
+    }
+}
+
+impl<T: Copy + Into<f32>> Vec4<T> {
+    pub fn length(&self) -> f32 {
+        (*self * *self).sqrt().into()
     }
 }
 
@@ -41,3 +50,4 @@ impl SetUniform for Vec4<u32> {
 impl_vec_ops_add!(Vec4<T>, x, y, z, w);
 impl_vec_ops_sub!(Vec4<T>, x, y, z, w);
 impl_vec_ops_mul_number!(Vec4<T>, x, y, z, w);
+impl_vec_mul_vec!(Vec4<T>, x, y, z, w);
