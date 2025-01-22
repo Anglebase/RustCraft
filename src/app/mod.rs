@@ -12,6 +12,8 @@ use glfw::*;
 pub struct App {
     glfw: Glfw,
     rx: Receiver<()>,
+    fps_rx: Receiver<u32>,
+    fps: u32,
 }
 
 impl App {
@@ -39,6 +41,7 @@ impl App {
         });
         debug!("App::new()", "启动 GLFW 渲染线程 ...");
         let (tx, rx) = channel();
+        let (fps_tx, fps_rx) = channel();
         spawn(move || {
             debug!("App::new()/render", "GLFW 渲染线程已启动");
             debug!("App::new()/render", "正在初始化 OpenGL 上下文 ...");
@@ -50,28 +53,52 @@ impl App {
             // 初始化渲染依赖
             render::init();
             debug!("App::new()/render", "启动渲染循环 ...");
+            // FPS 计数器
+            let mut frame_count = 0;
+            let mut now = std::time::Instant::now();
             while !window.should_close() {
+                // 允许处理事件
+                tx.send(()).unwrap();
+                // 统计 FPS
+                frame_count += 1;
+                let elapsed = now.elapsed();
+                if elapsed.as_secs() >= 1 {
+                    let fps = frame_count;
+                    fps_tx.send(fps).unwrap();
+                    frame_count = 0;
+                    now = std::time::Instant::now();
+                }
+                // 更新窗口尺寸
                 if let Ok((w, h)) = size_rx.try_recv() {
                     unsafe { gl::Viewport(0, 0, w as i32, h as i32) }
                 }
+                // 渲染
                 render::render();
                 window.swap_buffers();
             }
             debug!("App::new()/render", "渲染线程已退出");
-            tx.send(()).unwrap();
         });
 
-        Self { glfw, rx }
+        Self {
+            glfw,
+            rx,
+            fps_rx,
+            fps: 0,
+        }
     }
 
     pub fn exec(&mut self) {
         debug!("App::exec()", "启动事件循环 ...");
-        loop {
+        while let Ok(()) = self.rx.recv() {
             self.glfw.poll_events();
-            if let Ok(()) = self.rx.try_recv() {
-                debug!("App::exec()", "事件循环将退出...");
-                break;
+            if let Ok(fps) = self.fps_rx.try_recv() {
+                self.fps = fps;
             }
         }
+        debug!("App::exec()", "事件循环已退出");
+    }
+
+    pub fn get_fps(&self) -> u32 {
+        self.fps
     }
 }

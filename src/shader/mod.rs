@@ -1,8 +1,10 @@
 use crate::{debug, info, warn, RustCraftWrapper};
 use gl::types::*;
+use shader::Shader;
 use std::collections::{HashMap, HashSet};
 
 mod gl_utils;
+mod shader;
 
 pub struct ShaderManager {
     programs: HashMap<String, GLuint>,
@@ -213,12 +215,11 @@ impl RustCraftWrapper<ShaderManager> {
         });
     }
 
-    pub fn use_program(&self, name: &str) {
+    pub fn get(&self, name: &str) -> Option<Shader> {
+        let mut ret = None;
         self.apply(|manager| {
-            if let Some(program) = manager.programs.get(name) {
-                unsafe {
-                    gl_utils::use_program(*program);
-                }
+            if let Some(&program) = manager.programs.get(name) {
+                ret = Some(Shader { program });
             } else {
                 NOT_FOUND.apply(|set| {
                     if set.contains(name) {
@@ -232,6 +233,7 @@ impl RustCraftWrapper<ShaderManager> {
                 });
             }
         });
+        ret
     }
 }
 

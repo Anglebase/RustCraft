@@ -71,7 +71,7 @@ pub fn render() {
         gl::ClearColor(0.3, 0.5, 0.4, 1.0);
         gl::Clear(gl::COLOR_BUFFER_BIT);
 
-        SHADER_MANAGER.use_program("test");
+        SHADER_MANAGER.get("test").unwrap().use_program();
         MODEL.apply(|vao| {
             gl::BindVertexArray(*vao);
             gl::DrawElements(gl::TRIANGLES, 6, gl::UNSIGNED_INT, null());

@@ -30,13 +30,16 @@ impl Logger {
     }
 
     fn log(&self, level: Level, owner: &str, message: &str) {
+        use chrono::*;
+        let now = Local::now();
+        let timestamp = now.format("%Y-%m-%d %H:%M:%S").to_string();
         if level >= self.level {
             if let Some(ref file) = self.file {
                 let result = match level {
-                    Level::Debug => format!("[DEBUG] {} |: {}\n", owner, message),
-                    Level::Info => format!("[INFO]  {} |: {}\n", owner, message),
-                    Level::Warn => format!("[WARN]  {} |: {}\n", owner, message),
-                    Level::Error => format!("[ERROR] {} |: {}\n", owner, message),
+                    Level::Debug => format!("{} [DEBUG] {} |: {}\n", timestamp, owner, message),
+                    Level::Info => format!("{} [INFO]  {} |: {}\n", timestamp, owner, message),
+                    Level::Warn => format!("{} [WARN]  {} |: {}\n", timestamp, owner, message),
+                    Level::Error => format!("{} [ERROR] {} |: {}\n", timestamp, owner, message),
                 };
                 use std::fs::OpenOptions;
                 use std::io::Write;
@@ -48,10 +51,38 @@ impl Logger {
                 file.write_all(result.as_bytes()).unwrap();
             } else {
                 let result = match level {
-                    Level::Debug => format!("[DEBUG] {} |: {}", owner, message).green(),
-                    Level::Info => format!("[INFO]  {} |: {}", owner, message).blue(),
-                    Level::Warn => format!("[WARN]  {} |: {}", owner, message).yellow(),
-                    Level::Error => format!("[ERROR] {} |: {}", owner, message).red(),
+                    Level::Debug => format!(
+                        "{} {:<7} {} |: {}",
+                        timestamp,
+                        "[DEBUG]".green().italic().underline(),
+                        owner,
+                        message
+                    )
+                    .green(),
+                    Level::Info => format!(
+                        "{} {:<7} {} |: {}",
+                        timestamp,
+                        "[INFO]".blue(),
+                        owner,
+                        message
+                    )
+                    .blue(),
+                    Level::Warn => format!(
+                        "{} {:<7} {} |: {}",
+                        timestamp,
+                        "[WARN]".yellow().bold(),
+                        owner,
+                        message
+                    )
+                    .yellow(),
+                    Level::Error => format!(
+                        "{} {:<7} {} |: {}",
+                        timestamp,
+                        "[ERROR]".red().bold().underline(),
+                        owner,
+                        message
+                    )
+                    .red(),
                 };
                 if level == Level::Error {
                     eprintln!("{}", result);
@@ -127,13 +158,11 @@ mod tests {
         info!("test", "test message");
         warn!("test", "test message");
         error!("test", "test message");
-
-        debug!("outsized_name:test", "test message");
     }
 
     #[test]
     fn test_file() {
-        set_file(Some(r"./log.txt".to_string()));
+        set_file(Some(r"out/log.txt".to_string()));
         debug!("test", "test message");
         info!("test", "test message");
         warn!("test", "test message");
