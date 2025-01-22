@@ -17,13 +17,13 @@ mod events;
 pub struct App {
     glfw: Glfw,
     rx: Receiver<()>,
-    fps_rx: Receiver<u32>,
-    fps: u32,
+    dt_rx: Receiver<f32>,
+    dt: f32,
 }
 
 impl App {
     /// 设置渲染线程初始化回调函数
-    /// 
+    ///
     /// # 注解 Note
     /// + 调用此函数时，OpenGL 上下文已完成初始化
     /// + 此函数应在 `App::new()` 之前调用
@@ -37,7 +37,7 @@ impl App {
     }
     /// 设置渲染线程循环回调函数
     /// 此函数通常是渲染函数
-    /// 
+    ///
     /// # 注解 Note
     /// 此函数应在 `App::new()` 之前调用
     pub fn set_render_loop_callback<F>(func: F)
@@ -50,15 +50,15 @@ impl App {
     }
 
     /// 执行应用程序初始化
-    /// 
+    ///
     /// # 参数 Parameters
     /// - `width` - 窗口宽度
     /// - `height` - 窗口高度
     /// - `title` - 窗口标题
-    /// 
+    ///
     /// # 返回值 Returns
     /// 返回 `App` 实例
-    /// 
+    ///
     /// # 注解 Note
     pub fn new(width: u32, height: u32, title: &str) -> Self {
         info!("App", "程序已启动");
@@ -86,7 +86,7 @@ impl App {
         });
         debug!("App::new()", "启动 GLFW 渲染线程 ...");
         let (tx, rx) = channel();
-        let (fps_tx, fps_rx) = channel();
+        let (dt_tx, dt_rx) = channel();
         let (initialized_tx, initialized_rx) = channel();
         let (return_tx, return_rx) = channel();
         spawn(move || {
@@ -109,20 +109,14 @@ impl App {
             let mut window: PWindow = return_rx.recv().unwrap();
             debug!("App::new()/render", "启动渲染循环 ...");
             // FPS 计数器
-            let mut frame_count = 0;
             let mut now = std::time::Instant::now();
             while !window.should_close() {
                 // 允许处理事件
                 tx.send(()).unwrap();
-                // 统计 FPS
-                frame_count += 1;
-                let elapsed = now.elapsed();
-                if elapsed.as_secs() >= 1 {
-                    let fps = frame_count;
-                    fps_tx.send(fps).unwrap();
-                    frame_count = 0;
-                    now = std::time::Instant::now();
-                }
+                // 计算此帧渲染时间
+                let dt = now.elapsed().as_secs_f32();
+                now = std::time::Instant::now();
+                dt_tx.send(dt).unwrap();
                 // 更新窗口尺寸
                 if let Ok((w, h)) = size_rx.try_recv() {
                     unsafe { gl::Viewport(0, 0, w as i32, h as i32) }
@@ -151,8 +145,8 @@ impl App {
         Self {
             glfw,
             rx,
-            fps_rx,
-            fps: 0,
+            dt_rx,
+            dt: 0.0,
         }
     }
 
@@ -161,15 +155,22 @@ impl App {
         debug!("App::exec()", "启动事件循环 ...");
         while let Ok(()) = self.rx.recv() {
             self.glfw.poll_events();
-            if let Ok(fps) = self.fps_rx.try_recv() {
-                self.fps = fps;
+            if let Ok(dt) = self.dt_rx.try_recv() {
+                self.dt = dt;
             }
         }
         debug!("App::exec()", "事件循环已退出");
     }
 
     /// 获取当前帧率
-    pub fn get_fps(&self) -> u32 {
-        self.fps
+    pub fn get_fps(&self) -> f32 {
+        if self.dt == 0.0 {
+            return 0.0;
+        }
+        1.0 / self.dt
+    }
+
+    pub fn get_delta_time(&self) -> f32 {
+        self.dt
     }
 }
