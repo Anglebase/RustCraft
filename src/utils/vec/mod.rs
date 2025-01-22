@@ -9,8 +9,7 @@ pub use vec4::Vec4;
 #[macro_export]
 macro_rules! impl_vec_ops_add {
     ($type:ty, $($field:ident),+) => {
-        use std::ops::Add;
-        impl<T: Add<Output = T> + Copy> Add for $type {
+        impl<T: std::ops::Add<Output = T> + Copy> std::ops::Add for $type {
             type Output = Self;
 
             fn add(self, other: Self) -> Self {
@@ -25,8 +24,7 @@ macro_rules! impl_vec_ops_add {
 #[macro_export]
 macro_rules! impl_vec_ops_sub {
     ($type:ty, $($field:ident),+) => {
-        use std::ops::Sub;
-        impl<T: Sub<Output = T> + Copy> Sub for $type {
+        impl<T: std::ops::Sub<Output = T> + Copy> std::ops::Sub for $type {
             type Output = Self;
 
             fn sub(self, other: Self) -> Self {
@@ -41,8 +39,7 @@ macro_rules! impl_vec_ops_sub {
 #[macro_export]
 macro_rules! impl_vec_ops_mul_number {
     ($type:ty, $($field:ident),+) => {
-        use std::ops::Mul;
-        impl<T: Mul<Output = T> + Copy> Mul<T> for $type {
+        impl<T: std::ops::Mul<Output = T> + Copy> std::ops::Mul<T> for $type {
             type Output = Self;
 
             fn mul(self, other: T) -> Self {

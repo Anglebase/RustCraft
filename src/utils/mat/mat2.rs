@@ -2,7 +2,7 @@ use crate::{impl_mat_ops_add, impl_mat_ops_mul_number, impl_mat_ops_sub, utils::
 
 #[derive(Debug, Clone, Copy)]
 pub struct Mat2<T> {
-    data: [[T; 2]; 2],
+    pub(crate) data: [[T; 2]; 2],
 }
 
 impl<T: From<f32>> Mat2<T> {

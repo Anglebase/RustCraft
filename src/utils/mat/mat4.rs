@@ -1,8 +1,8 @@
-use crate::{impl_mat_ops_add, impl_mat_ops_mul_number, impl_mat_ops_sub, utils::SetUniform};
+use crate::{impl_mat_mul_mat, impl_mat_ops_add, impl_mat_ops_mul_number, impl_mat_ops_sub, utils::SetUniform};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Mat4<T> {
-    data: [[T; 4]; 4],
+    pub(crate) data: [[T; 4]; 4],
 }
 
 impl<T: From<f32>> Mat4<T> {
@@ -45,3 +45,4 @@ impl SetUniform for Mat4<f64> {
 impl_mat_ops_add!(Mat4<T>, 4, 4);
 impl_mat_ops_sub!(Mat4<T>, 4, 4);
 impl_mat_ops_mul_number!(Mat4<T>, 4, 4);
+impl_mat_mul_mat!(Mat4<T>, 4, 4);
