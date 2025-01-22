@@ -163,7 +163,6 @@ impl App {
             self.glfw.poll_events();
             if let Ok(fps) = self.fps_rx.try_recv() {
                 self.fps = fps;
-                debug!("App::exec()", "FPS: {}", self.fps);
             }
         }
         debug!("App::exec()", "事件循环已退出");

@@ -28,7 +28,7 @@ impl ModelManager {
 
 use lazy_static::lazy_static;
 
-use crate::{warn, RustCraftWrapper};
+use crate::{debug, warn, RustCraftWrapper};
 
 lazy_static! {
     /// 模型管理器
@@ -75,6 +75,18 @@ impl RustCraftWrapper<ModelManager> {
     /// ```
     pub fn add_model(&self, name: &str, vertices: Vec<f32>, indices: Vec<u32>, description: &str) {
         self.apply(|manager| manager.add(name, vertices, indices, description));
+    }
+
+    pub fn load_from_json(&self, json: &str) {
+        debug!("RCW<ModelManager>", "尝试载入模型 {}", json);
+        let (name, vertices, indices, description) = match Model::load_from_json(json) {
+            Ok(v) => v,
+            Err(e) => {
+                warn!("RCW<ModelManager>", "模型 {} 载入失败: {}", json, e);
+                return;
+            }
+        };
+        self.add_model(&name, vertices, indices, &description);
     }
 
     /// 渲染参数所指定的模型
