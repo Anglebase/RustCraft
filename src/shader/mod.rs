@@ -1,9 +1,8 @@
-use crate::{debug, info, warn, RustCraftWrapper};
+use crate::{debug, gl_utils, info, warn, RustCraftWrapper};
 use gl::types::*;
 use shader::Shader;
 use std::collections::{HashMap, HashSet};
 
-pub(crate) mod gl_utils;
 mod shader;
 
 pub struct ShaderManager {
@@ -50,10 +49,7 @@ impl ShaderManager {
             let entry = match entry {
                 Ok(entry) => entry,
                 Err(e) => {
-                    warn!(
-                        "ShaderManager",
-                        "遍历项目出现错误，由于 \"{}\"", e
-                    );
+                    warn!("ShaderManager", "遍历项目出现错误，由于 \"{}\"", e);
                     continue;
                 }
             };
@@ -71,47 +67,27 @@ impl ShaderManager {
                     continue;
                 }
             };
-            debug!(
-                "ShaderManager",
-                "检索到文件: {}",
-                path.display()
-            );
+            debug!("ShaderManager", "检索到文件: {}", path.display());
             // 文件扩展名
             let ext: &str = if let Some(ext) = path.extension() {
                 ext.to_str().unwrap()
             } else {
-                info!(
-                    "ShaderManager",
-                    "忽略未知文件: {}",
-                    path.display()
-                );
+                info!("ShaderManager", "忽略未知文件: {}", path.display());
                 continue;
             };
             // 文件本名
             let filename = if let Some(ext) = path.file_stem() {
                 ext.to_str().unwrap()
             } else {
-                info!(
-                    "ShaderManager",
-                    "忽略未知文件: {}",
-                    path.display()
-                );
+                info!("ShaderManager", "忽略未知文件: {}", path.display());
                 continue;
             };
             // 标记着色器
             if vert_ext.contains(ext) {
-                debug!(
-                    "ShaderManager",
-                    "顶点着色器: {}",
-                    path.display()
-                );
+                debug!("ShaderManager", "顶点着色器: {}", path.display());
                 vert_codes.insert(filename.to_string(), content);
             } else if frag_ext.contains(ext) {
-                debug!(
-                    "ShaderManager",
-                    "片段着色器: {}",
-                    path.display()
-                );
+                debug!("ShaderManager", "片段着色器: {}", path.display());
                 frag_codes.insert(filename.to_string(), content);
             }
         }
@@ -172,16 +148,10 @@ impl ShaderManager {
         let vert_set_ignore = vert_set.difference(&frag_set);
         let frag_set_ignore = frag_set.difference(&vert_set);
         for path in vert_set_ignore {
-            warn!(
-                "ShaderManager",
-                "没有与\"{}\"匹配的片段着色器", path
-            );
+            warn!("ShaderManager", "没有与\"{}\"匹配的片段着色器", path);
         }
         for path in frag_set_ignore {
-            warn!(
-                "ShaderManager",
-                "没有与\"{}\"匹配的顶点着色器", path
-            );
+            warn!("ShaderManager", "没有与\"{}\"匹配的顶点着色器", path);
         }
         vert_shader.retain(|path, shader| frag_set.contains(path) && shader.is_some());
         frag_shader.retain(|path, shader| vert_set.contains(path) && shader.is_some());

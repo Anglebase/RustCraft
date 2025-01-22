@@ -78,6 +78,7 @@ impl App {
                 window.swap_buffers();
             }
             debug!("App::new()/render", "渲染线程已退出");
+            info!("App", "程序即将退出");
         });
 
         Self {

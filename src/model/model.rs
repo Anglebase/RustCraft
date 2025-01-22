@@ -1,4 +1,4 @@
-use crate::shader::gl_utils;
+use crate::gl_utils;
 use gl::types::*;
 
 pub struct Model {

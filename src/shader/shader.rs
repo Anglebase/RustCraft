@@ -1,6 +1,6 @@
 use gl::types::*;
 
-use super::gl_utils;
+use crate::gl_utils;
 
 pub struct Shader {
     pub(crate) program: GLuint,
