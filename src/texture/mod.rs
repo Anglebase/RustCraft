@@ -73,7 +73,7 @@ lazy_static! {
 }
 
 impl RustCraftWrapper<TextureManager> {
-    pub fn init(&self, dir: &str) {
+    pub fn load_from(&self, dir: &str) {
         debug!("RCW<TextureManager>", "正在从 {} 加载纹理", dir);
         self.apply(|tm| tm.init(dir));
     }

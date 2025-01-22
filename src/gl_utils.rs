@@ -146,6 +146,7 @@ pub unsafe fn load_texture_from_file(path: &str) -> Result<GLuint, Box<dyn std::
         data.as_ptr() as *const GLvoid,
     );
     gl::GenerateMipmap(gl::TEXTURE_2D);
+    gl::BindTexture(gl::TEXTURE_2D, 0);
 
     Ok(texture)
 }
