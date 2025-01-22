@@ -11,3 +11,49 @@ mod mat4;
 pub use mat2::Mat2;
 pub use mat3::Mat3;
 pub use mat4::Mat4;
+
+#[macro_export]
+macro_rules! impl_mat_ops_add {
+    ($type:ty, $rows:expr, $cols:expr) => {
+        use std::ops::Add;
+        impl<T> Add for $type
+        where
+            T: Copy + Add<Output = T> + From<f32>,
+        {
+            type Output = Self;
+
+            fn add(self, other: Self) -> Self::Output {
+                let mut result = Self::default();
+                for i in 0..$rows {
+                    for j in 0..$cols {
+                        result.data[i][j] = self.data[i][j] + other.data[i][j];
+                    }
+                }
+                result
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! impl_mat_ops_sub {
+    ($type:ty, $rows:expr, $cols:expr) => {
+        use std::ops::Sub;
+        impl<T> Sub for $type
+        where
+            T: Copy + Sub<Output = T> + From<f32>,
+        {
+            type Output = Self;
+
+            fn sub(self, other: Self) -> Self::Output {
+                let mut result = Self::default();
+                for i in 0..$rows {
+                    for j in 0..$cols {
+                        result.data[i][j] = self.data[i][j] - other.data[i][j];
+                    }
+                }
+                result
+            }
+        }
+    };
+}

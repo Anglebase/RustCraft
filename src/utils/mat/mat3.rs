@@ -1,5 +1,6 @@
-use crate::utils::SetUniform;
+use crate::{impl_mat_ops_add, impl_mat_ops_sub, utils::SetUniform};
 
+#[derive(Debug, Clone, Copy)]
 pub struct Mat3<T> {
     data: [[T; 3]; 3],
 }
@@ -14,13 +15,12 @@ impl<T: From<f32>> Mat3<T> {
             ],
         }
     }
-    pub fn zero() -> Self {
+}
+
+impl<T: From<f32> + Copy> Default for Mat3<T> {
+    fn default() -> Self {
         Self {
-            data: [
-                [0.0.into(), 0.0.into(), 0.0.into()],
-                [0.0.into(), 0.0.into(), 0.0.into()],
-                [0.0.into(), 0.0.into(), 0.0.into()],
-            ],
+            data: [[0.0.into(); 3]; 3],
         }
     }
 }
@@ -40,3 +40,6 @@ impl SetUniform for Mat3<f64> {
         }
     }
 }
+
+impl_mat_ops_add!(Mat3<T>, 3, 3);
+impl_mat_ops_sub!(Mat3<T>, 3, 3);
