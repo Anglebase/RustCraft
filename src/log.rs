@@ -36,10 +36,10 @@ impl Logger {
         if level >= self.level {
             if let Some(ref file) = self.file {
                 let result = match level {
-                    Level::Debug => format!("{} [DEBUG] {} |: {}\n", timestamp, owner, message),
-                    Level::Info => format!("{} [INFO]  {} |: {}\n", timestamp, owner, message),
-                    Level::Warn => format!("{} [WARN]  {} |: {}\n", timestamp, owner, message),
-                    Level::Error => format!("{} [ERROR] {} |: {}\n", timestamp, owner, message),
+                    Level::Debug => format!("{} [DEBUG] {:>20} |: {}\n", timestamp, owner, message),
+                    Level::Info => format!("{} [INFO]  {:>20} |: {}\n", timestamp, owner, message),
+                    Level::Warn => format!("{} [WARN]  {:>20} |: {}\n", timestamp, owner, message),
+                    Level::Error => format!("{} [ERROR] {:>20} |: {}\n", timestamp, owner, message),
                 };
                 use std::fs::OpenOptions;
                 use std::io::Write;
@@ -52,7 +52,7 @@ impl Logger {
             } else {
                 let result = match level {
                     Level::Debug => format!(
-                        "{} {:<7} {} |: {}",
+                        "{} {:<7} {:>20} |: {}",
                         timestamp,
                         "[DEBUG]".green().italic().underline(),
                         owner,
@@ -60,7 +60,7 @@ impl Logger {
                     )
                     .green(),
                     Level::Info => format!(
-                        "{} {:<7} {} |: {}",
+                        "{} {:<7} {:>20} |: {}",
                         timestamp,
                         "[INFO]".blue(),
                         owner,
@@ -68,7 +68,7 @@ impl Logger {
                     )
                     .blue(),
                     Level::Warn => format!(
-                        "{} {:<7} {} |: {}",
+                        "{} {:<7} {:>20} |: {}",
                         timestamp,
                         "[WARN]".yellow().bold(),
                         owner,
@@ -76,7 +76,7 @@ impl Logger {
                     )
                     .yellow(),
                     Level::Error => format!(
-                        "{} {:<7} {} |: {}",
+                        "{} {:<7} {:>20} |: {}",
                         timestamp,
                         "[ERROR]".red().bold().underline(),
                         owner,

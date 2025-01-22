@@ -119,3 +119,33 @@ pub unsafe fn create_model_context(
     gl::BindVertexArray(0);
     (vao, vbo, ebo)
 }
+
+pub unsafe fn load_texture_from_file(path: &str) -> Result<GLuint, Box<dyn std::error::Error>> {
+    use image::*;
+    let img = open(path)?.to_rgba8();
+    let (width, height) = img.dimensions();
+    let data = img.into_raw();
+
+    let mut texture: GLuint = 0;
+    gl::GenTextures(1, &mut texture);
+    gl::BindTexture(gl::TEXTURE_2D, texture);
+    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_S, gl::REPEAT as i32);
+    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_WRAP_T, gl::REPEAT as i32);
+    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MIN_FILTER, gl::LINEAR as i32);
+    gl::TexParameteri(gl::TEXTURE_2D, gl::TEXTURE_MAG_FILTER, gl::LINEAR as i32);
+
+    gl::TexImage2D(
+        gl::TEXTURE_2D,
+        0,
+        gl::RGBA as i32,
+        width as i32,
+        height as i32,
+        0,
+        gl::RGBA,
+        gl::UNSIGNED_BYTE,
+        data.as_ptr() as *const GLvoid,
+    );
+    gl::GenerateMipmap(gl::TEXTURE_2D);
+
+    Ok(texture)
+}

@@ -26,6 +26,7 @@ impl App {
             error!("App::new()", "初始化 GLFW 失败！");
             panic!("初始化 GLFW 失败！");
         };
+        glfw.window_hint(WindowHint::Visible(false));
         let mut window = if let Some((window, _)) =
             glfw.create_window(width, height, title, WindowMode::Windowed)
         {
@@ -43,6 +44,8 @@ impl App {
         debug!("App::new()", "启动 GLFW 渲染线程 ...");
         let (tx, rx) = channel();
         let (fps_tx, fps_rx) = channel();
+        let (initialized_tx, initialized_rx) = channel();
+        let (return_tx, return_rx) = channel();
         spawn(move || {
             debug!("App::new()/render", "GLFW 渲染线程已启动");
             debug!("App::new()/render", "正在初始化 OpenGL 上下文 ...");
@@ -53,6 +56,9 @@ impl App {
             debug!("App::new()/render", "初始化渲染依赖 ...");
             // 初始化渲染依赖
             render::init();
+            // 暂时借出所有权
+            initialized_tx.send(window).unwrap();
+            let mut window: PWindow = return_rx.recv().unwrap();
             debug!("App::new()/render", "启动渲染循环 ...");
             // FPS 计数器
             let mut frame_count = 0;
@@ -80,6 +86,15 @@ impl App {
             debug!("App::new()/render", "渲染线程已退出");
             info!("App", "程序即将退出");
         });
+        {
+            // 当渲染线程初始化完成后，显示 GLFW 窗口
+            let mut window = initialized_rx.recv().unwrap();
+            info!("App", "初始化已完成");
+            debug!("App::new()", "显示 GLFW 窗口 ...");
+            window.show();
+            return_tx.send(window).unwrap();
+        }
+        debug!("App::new()", "GLFW 渲染线程已初始化");
 
         Self {
             glfw,
