@@ -1,7 +1,7 @@
 use math::*;
 
 use super::*;
-use crate::{utils::*, App};
+use crate::{utils::*, App, TimeType};
 
 pub struct SpaceCamera {
     pos: Vec3<f32>,
@@ -31,7 +31,10 @@ impl Camera for SpaceCamera {
     }
 
     fn update(&mut self, window: &mut glfw::Window) {
-        let dt = App::delta_time();
+        if window.get_key(glfw::Key::LeftAlt) == glfw::Action::Press {
+            return;
+        }
+        let dt = App::delta_time(TimeType::PollEvent);
         let speed = self.speed * dt;
         let up = Vec3::from([0.0, 1.0, 0.0]);
         let front = (Vec4::from([0.0, 0.0, -1.0, 1.0]) * rotate3_y(radian(self.yaw))).xyz();
@@ -86,9 +89,9 @@ impl Camera for SpaceCamera {
 
 impl SpaceCamera {
     /// 创建一个空间相机
-    /// 
+    ///
     /// # 参数
-    /// 
+    ///
     /// * `pos` - 相机位置
     /// * `speed` - 相机移动速度
     /// * `sen` - 相机旋转速度

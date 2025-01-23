@@ -9,11 +9,11 @@ mod shader;
 mod texture;
 pub mod utils;
 
-pub use app::{App, AppBuilder};
+pub use app::{App, AppBuilder, TimeType};
+pub use camera::CAMERA_SYSTEM;
 pub use model::MODEL_MANAGER;
 pub use shader::SHADER_MANAGER;
 pub use texture::TEXTURE_MANAGER;
-pub use camera::CAMERA_SYSTEM;
 
 /// 全局对象包装器
 /// 它利用 Mutex 的内部可变性实现全局对象的简洁访问
