@@ -1,6 +1,10 @@
 use glfw::*;
 use rustcraft::{debug, log::*, utils::Mat4, *};
-use utils::{look_at, perspective, radian, rotate3, tranlate3, Vec3};
+use utils::{
+    look_at,
+    math::{rotate3, tranlate3},
+    perspective, radian, Vec3,
+};
 
 pub fn key_callback(window: &mut Window, key: Key, scancode: i32, action: Action, mods: Modifiers) {
     match (key, action) {
@@ -31,16 +35,16 @@ fn render_loop() {
         gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
     }
     let view = look_at(
-        Vec3::new(0.0, 0.0, 3.0),
-        Vec3::new(0.0, 0.0, 0.0),
-        Vec3::new(0.0, 1.0, 0.0),
+        Vec3::from([0.0, 0.0, 3.0]),
+        Vec3::from([0.0, 0.0, 0.0]),
+        Vec3::from([0.0, 1.0, 0.0]),
     );
     let (w, h) = App::window_size();
     let proj = perspective(radian(45.0), w as f32 / h as f32, 0.1, 100.0);
 
     let shader = SHADER_MANAGER.get("cube").unwrap();
-    let model: Mat4<f32> = rotate3(radian(App::time() * 100.0), Vec3::new(1.0, 1.0, 0.0));
-    let model = tranlate3(0.0, 0.0, -1.0) * model;
+    let model: Mat4<f32> = rotate3(radian(App::time() * 100.0), Vec3::from([1.0, 1.0, 0.0]));
+    let model = tranlate3(Vec3::from([0.0, 0.0, -1.0])) * model;
     shader.use_program();
     shader.set_uniform("model", model);
     shader.set_uniform("view", view);
