@@ -1,7 +1,9 @@
 use crate::gl_utils;
 use gl::types::*;
 
-pub struct Model {
+use super::Model;
+
+pub struct ElementModel {
     vertices: Vec<f32>,
     indices: Vec<u32>,
     vao: GLuint,
@@ -9,7 +11,7 @@ pub struct Model {
     ebo: GLuint,
 }
 
-impl Model {
+impl ElementModel {
     pub fn new(vertices: Vec<f32>, indices: Vec<u32>, description: &str) -> Self {
         let mut ret = Self {
             vertices,
@@ -25,8 +27,10 @@ impl Model {
         ret.ebo = ebo;
         ret
     }
+}
 
-    pub fn draw(&self) {
+impl Model for ElementModel {
+    fn draw(&self) {
         unsafe {
             gl::BindVertexArray(self.vao);
             gl::DrawElements(
@@ -39,7 +43,7 @@ impl Model {
     }
 }
 
-impl Drop for Model {
+impl Drop for ElementModel {
     fn drop(&mut self) {
         unsafe {
             gl::DeleteVertexArrays(1, &self.vao);
@@ -49,7 +53,7 @@ impl Drop for Model {
     }
 }
 
-impl Model {
+impl ElementModel {
     pub fn load_from_json(path: &str) -> Result<(String, Vec<f32>, Vec<u32>, String), String> {
         let string = match std::fs::read_to_string(path) {
             Ok(string) => string,

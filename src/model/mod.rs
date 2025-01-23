@@ -1,10 +1,14 @@
 use std::collections::{HashMap, HashSet};
 
 pub mod model;
-use model::Model;
+use model::ElementModel;
+
+pub trait Model {
+    fn draw(&self);
+}
 
 pub struct ModelManager {
-    models: HashMap<String, Model>,
+    models: HashMap<String, Box<dyn Model + Send + 'static>>,
 }
 
 impl ModelManager {
@@ -17,11 +21,11 @@ impl ModelManager {
     pub fn add(&mut self, name: &str, vertices: Vec<f32>, indices: Vec<u32>, description: &str) {
         self.models.insert(
             String::from(name),
-            Model::new(vertices, indices, description),
+            Box::new(ElementModel::new(vertices, indices, description)),
         );
     }
 
-    pub fn get(&self, name: &str) -> Option<&Model> {
+    pub fn get(&self, name: &str) -> Option<&Box<dyn Model + Send + 'static>> {
         self.models.get(name)
     }
 }
@@ -79,7 +83,7 @@ impl RustCraftWrapper<ModelManager> {
 
     pub fn load_from_json(&self, json: &str) {
         debug!("RCW<ModelManager>", "尝试载入模型 {}", json);
-        let (name, vertices, indices, description) = match Model::load_from_json(json) {
+        let (name, vertices, indices, description) = match ElementModel::load_from_json(json) {
             Ok(v) => v,
             Err(e) => {
                 warn!("RCW<ModelManager>", "模型 {} 载入失败: {}", json, e);
