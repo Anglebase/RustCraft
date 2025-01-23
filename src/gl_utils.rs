@@ -127,7 +127,10 @@ pub unsafe fn create_element_model_context(
     (vao, vbo, ebo)
 }
 
-pub unsafe fn create_array_model_context(vertices: &Vec<f32>, description: &str) -> (GLuint, GLuint) {
+pub unsafe fn create_array_model_context(
+    vertices: &Vec<f32>,
+    description: &str,
+) -> (GLuint, GLuint) {
     let mut vao: GLuint = 0;
     let mut vbo: GLuint = 0;
     gl::GenVertexArrays(1, &mut vao);

@@ -3,9 +3,9 @@ use std::{
     path::Path,
 };
 
-mod model_file;
-mod element_model;
 mod array_model;
+mod element_model;
+mod model_file;
 
 pub trait Model {
     fn draw(&self);
@@ -23,10 +23,7 @@ impl ModelManager {
     }
 
     pub fn add(&mut self, name: &str, model: Box<dyn Model + Send + 'static>) {
-        self.models.insert(
-            String::from(name),
-            model,
-        );
+        self.models.insert(String::from(name), model);
     }
 
     pub fn get(&self, name: &str) -> Option<&Box<dyn Model + Send + 'static>> {

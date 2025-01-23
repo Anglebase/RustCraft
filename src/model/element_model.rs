@@ -21,8 +21,9 @@ impl ElementModel {
             vbo: 0,
             ebo: 0,
         };
-        let (vao, vbo, ebo) =
-            unsafe { gl_utils::create_element_model_context(&ret.vertices, &ret.indices, description) };
+        let (vao, vbo, ebo) = unsafe {
+            gl_utils::create_element_model_context(&ret.vertices, &ret.indices, description)
+        };
         ret.vao = vao;
         ret.vbo = vbo;
         ret.ebo = ebo;
@@ -55,7 +56,9 @@ impl Drop for ElementModel {
 }
 
 impl ElementModel {
-    pub fn load_from_json(json: &JsonValue) -> Result<(String, Vec<f32>, Vec<u32>, String), String> {
+    pub fn load_from_json(
+        json: &JsonValue,
+    ) -> Result<(String, Vec<f32>, Vec<u32>, String), String> {
         if !json.has_key("name") {
             return Err("JSON 中缺少 name 字段".to_string());
         }

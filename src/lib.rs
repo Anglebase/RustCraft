@@ -1,6 +1,6 @@
 use std::sync::Mutex;
 
-pub mod app;
+mod app;
 pub(crate) mod gl_utils;
 pub mod log;
 mod model;

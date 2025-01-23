@@ -44,9 +44,7 @@ impl Drop for ArrayModel {
 }
 
 impl ArrayModel {
-    pub fn load_from_json(
-        json: &JsonValue,
-    ) -> Result<(String, Vec<f32>, String), String> {
+    pub fn load_from_json(json: &JsonValue) -> Result<(String, Vec<f32>, String), String> {
         if !json.has_key("name") {
             return Err("JSON 中缺少 name 字段".to_string());
         }
