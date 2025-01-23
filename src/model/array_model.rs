@@ -4,58 +4,49 @@ use json::JsonValue;
 
 use super::Model;
 
-pub struct ElementModel {
+pub struct ArrayModel {
     vertices: Vec<f32>,
-    indices: Vec<u32>,
     vao: GLuint,
     vbo: GLuint,
-    ebo: GLuint,
 }
 
-impl ElementModel {
-    pub fn new(vertices: Vec<f32>, indices: Vec<u32>, description: &str) -> Self {
+impl ArrayModel {
+    pub fn new(vertices: Vec<f32>, description: &str) -> Self {
         let mut ret = Self {
             vertices,
-            indices,
             vao: 0,
             vbo: 0,
-            ebo: 0,
         };
-        let (vao, vbo, ebo) =
-            unsafe { gl_utils::create_element_model_context(&ret.vertices, &ret.indices, description) };
+        let (vao, vbo) =
+            unsafe { gl_utils::create_array_model_context(&ret.vertices, description) };
         ret.vao = vao;
         ret.vbo = vbo;
-        ret.ebo = ebo;
         ret
     }
 }
 
-impl Model for ElementModel {
+impl Model for ArrayModel {
     fn draw(&self) {
         unsafe {
             gl::BindVertexArray(self.vao);
-            gl::DrawElements(
-                gl::TRIANGLES,
-                self.indices.len() as i32,
-                gl::UNSIGNED_INT,
-                0 as _,
-            );
+            gl::DrawArrays(gl::TRIANGLES, 0, (self.vertices.len() / 3) as i32);
         }
     }
 }
 
-impl Drop for ElementModel {
+impl Drop for ArrayModel {
     fn drop(&mut self) {
         unsafe {
             gl::DeleteVertexArrays(1, &self.vao);
             gl::DeleteBuffers(1, &self.vbo);
-            gl::DeleteBuffers(1, &self.ebo);
         }
     }
 }
 
-impl ElementModel {
-    pub fn load_from_json(json: &JsonValue) -> Result<(String, Vec<f32>, Vec<u32>, String), String> {
+impl ArrayModel {
+    pub fn load_from_json(
+        json: &JsonValue,
+    ) -> Result<(String, Vec<f32>, String), String> {
         if !json.has_key("name") {
             return Err("JSON 中缺少 name 字段".to_string());
         }
@@ -64,9 +55,6 @@ impl ElementModel {
         }
         if !json.has_key("vertices") {
             return Err("JSON 中缺少 vertices 字段".to_string());
-        }
-        if !json.has_key("indices") {
-            return Err("JSON 中缺少 indices 字段".to_string());
         }
         let name = if let Some(name) = json["name"].as_str() {
             name.to_string()
@@ -78,16 +66,10 @@ impl ElementModel {
         } else {
             return Err("JSON 中 description 字段无效".to_string());
         };
-
         let vertices = &json["vertices"];
-        let indices = &json["indices"];
         let mut ret_vertices = vec![];
-        let mut ret_indices = vec![];
         if !vertices.is_array() {
             return Err("JSON 中 vertices 字段不是数组".to_string());
-        }
-        if !indices.is_array() {
-            return Err("JSON 中 indices 字段不是数组".to_string());
         }
         for vertex in vertices.members() {
             if vertex.is_number() {
@@ -96,13 +78,6 @@ impl ElementModel {
                 return Err("JSON 中 vertices 字段数组元素不是数字".to_string());
             }
         }
-        for index in indices.members() {
-            if index.is_number() {
-                ret_indices.push(index.as_u32().unwrap());
-            } else {
-                return Err("JSON 中 indices 字段数组元素不是数字".to_string());
-            }
-        }
-        Ok((name, ret_vertices, ret_indices, description))
+        Ok((name, ret_vertices, description))
     }
 }

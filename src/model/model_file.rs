@@ -1,4 +1,4 @@
-use super::{element_model::ElementModel, Model};
+use super::{array_model::ArrayModel, element_model::ElementModel, Model};
 
 pub fn load_from_json(path: &str) -> Result<(String, Box<dyn Model + Send + 'static>), String> {
     let string = match std::fs::read_to_string(path) {
@@ -27,6 +27,10 @@ pub fn load_from_json(path: &str) -> Result<(String, Box<dyn Model + Send + 'sta
                 name,
                 Box::new(ElementModel::new(vertices, indices, &description)),
             ))
+        }
+        "array" => {
+            let (name, vertices, description) = ArrayModel::load_from_json(&json)?;
+            Ok((name, Box::new(ArrayModel::new(vertices, &description))))
         }
         _ => Err(format!("无效的模型类型格式: {}", model_type)),
     }

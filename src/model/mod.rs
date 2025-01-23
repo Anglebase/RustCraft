@@ -3,8 +3,9 @@ use std::{
     path::Path,
 };
 
-mod element_model;
 mod model_file;
+mod element_model;
+mod array_model;
 
 pub trait Model {
     fn draw(&self);
