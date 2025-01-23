@@ -109,7 +109,6 @@ impl App {
             panic!("初始化 GLFW 失败！");
         };
         glfw.window_hint(WindowHint::Visible(false));
-
         let mut window = if let Some((window, _)) =
             glfw.create_window(width, height, title, WindowMode::Windowed)
         {
@@ -119,6 +118,12 @@ impl App {
             panic!("创建 GLFW 窗口失败！");
         };
         debug!("App::new()", "初始化 GLFW 窗口 ...");
+        unsafe {
+            use glfw::ffi::*;
+            let mode = glfwGetVideoMode(glfwGetPrimaryMonitor()).as_ref().unwrap();
+            let (w, h) = window.get_size();
+            window.set_pos((mode.width - w) / 2, (mode.height - h) / 2);
+        }
         KEY_CALLBACK.apply(|data| {
             if data.is_some() {
                 let func = data.take().unwrap();

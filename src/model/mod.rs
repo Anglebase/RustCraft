@@ -1,7 +1,10 @@
-use std::collections::{HashMap, HashSet};
+use std::{
+    collections::{HashMap, HashSet},
+    path::Path,
+};
 
-pub mod model;
-use model::ElementModel;
+mod element_model;
+mod model_file;
 
 pub trait Model {
     fn draw(&self);
@@ -18,10 +21,10 @@ impl ModelManager {
         }
     }
 
-    pub fn add(&mut self, name: &str, vertices: Vec<f32>, indices: Vec<u32>, description: &str) {
+    pub fn add(&mut self, name: &str, model: Box<dyn Model + Send + 'static>) {
         self.models.insert(
             String::from(name),
-            Box::new(ElementModel::new(vertices, indices, description)),
+            model,
         );
     }
 
@@ -77,20 +80,42 @@ impl RustCraftWrapper<ModelManager> {
     /// let indices = vec![0, 1, 2, 2, 3, 0];
     /// MODEL_MANAGER.add_model("Face", vertices, indices, "3f;3f;2f");
     /// ```
-    pub fn add_model(&self, name: &str, vertices: Vec<f32>, indices: Vec<u32>, description: &str) {
-        self.apply(|manager| manager.add(name, vertices, indices, description));
+    pub fn add_model(&self, name: &str, model: Box<dyn Model + Send + 'static>) {
+        self.apply(|manager| manager.add(name, model));
     }
 
-    pub fn load_from_json(&self, json: &str) {
-        debug!("RCW<ModelManager>", "尝试载入模型 {}", json);
-        let (name, vertices, indices, description) = match ElementModel::load_from_json(json) {
-            Ok(v) => v,
-            Err(e) => {
-                warn!("RCW<ModelManager>", "模型 {} 载入失败: {}", json, e);
+    pub fn load_from_file(&self, path: &str) {
+        debug!("RCW<ModelManager>", "尝试载入模型 {}", path);
+        let ext = if let Some(ext) = Path::new(path).extension() {
+            if let Some(ext) = ext.to_str() {
+                ext
+            } else {
+                warn!("RCW<ModelManager>", "无法解析文件扩展名: {}", path);
                 return;
             }
+        } else {
+            warn!("RCW<ModelManager>", "无法确定文件类型: {}", path);
+            return;
         };
-        self.add_model(&name, vertices, indices, &description);
+        match ext {
+            "json" => {
+                let (name, model) = match model_file::load_from_json(path) {
+                    Ok(result) => result,
+                    Err(err) => {
+                        warn!("RCW<ModelManager>", "载入模型 {} 失败: {}", path, err);
+                        return;
+                    }
+                };
+                self.add_model(&name, model);
+            }
+            _ => {
+                warn!(
+                    "RCW<ModelManager>",
+                    "不支持的文件类型: {}, 文件: {}", ext, path
+                );
+                return;
+            }
+        }
     }
 
     /// 渲染参数所指定的模型

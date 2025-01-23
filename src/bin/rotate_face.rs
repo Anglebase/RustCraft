@@ -7,7 +7,7 @@ fn render_init() {
     debug!("render::init()", "正在载入纹理...");
     TEXTURE_MANAGER.load_from("texture/");
 
-    MODEL_MANAGER.load_from_json("model/face.json");
+    MODEL_MANAGER.load_from_file("model/face.json");
 }
 
 fn render_loop() {

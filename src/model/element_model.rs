@@ -1,5 +1,6 @@
 use crate::gl_utils;
 use gl::types::*;
+use json::JsonValue;
 
 use super::Model;
 
@@ -54,18 +55,7 @@ impl Drop for ElementModel {
 }
 
 impl ElementModel {
-    pub fn load_from_json(path: &str) -> Result<(String, Vec<f32>, Vec<u32>, String), String> {
-        let string = match std::fs::read_to_string(path) {
-            Ok(string) => string,
-            Err(err) => return Err(format!("读取文件时错误: {}", err)),
-        };
-        let json = match json::parse(&string) {
-            Ok(json) => json,
-            Err(err) => return Err(format!("JSON 解析错误: {}", err)),
-        };
-        if !json.is_object() {
-            return Err("JSON 不是对象".to_string());
-        }
+    pub fn load_from_json(json: &JsonValue) -> Result<(String, Vec<f32>, Vec<u32>, String), String> {
         if !json.has_key("name") {
             return Err("JSON 中缺少 name 字段".to_string());
         }

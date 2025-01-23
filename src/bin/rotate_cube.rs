@@ -19,7 +19,7 @@ fn render_init() {
     debug!("render::init()", "正在载入纹理...");
     TEXTURE_MANAGER.load_from("texture/");
 
-    MODEL_MANAGER.load_from_json("model/cube.json");
+    MODEL_MANAGER.load_from_file("model/cube.json");
     unsafe {
         gl::Enable(gl::DEPTH_TEST);
     }
@@ -55,6 +55,6 @@ fn main() {
     App::set_render_init_callback(render_init);
     App::set_render_loop_callback(render_loop);
     App::set_key_callback(key_callback);
-    let mut app = App::new(800, 800, "RustCraft");
+    let mut app = App::new(1600, 900, "RustCraft");
     app.exec();
 }
