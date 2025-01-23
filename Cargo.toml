@@ -2,6 +2,9 @@
 name = "rustcraft"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "一个 Rust 下的 OpenGL 集成框架|An OpenGL integration framework in Rust"
+repository = "https://github.com/Anglebase/RustCraft.git"
 
 [dependencies]
 chrono = "0.4.39"
