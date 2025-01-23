@@ -56,32 +56,51 @@ impl RustCraftWrapper<ModelManager> {
     /// # 注解 Note
     ///
     /// 此函数只有在 OpenGL 上下文激活后才能调用
-    ///
-    /// 顶点数据描述的格式为： [num type;...]
-    /// num: 值个数
-    /// type: 值类型
-    ///     + f: 单精度浮点数
-    ///     + i: 整型
-    ///     + u: 无符号整型
-    ///     + _: 一字节占位符
-    /// 例如："3f;2f", "3f;3f;2f"
-    ///
-    /// # 示例 Examples
-    ///
-    /// ```
-    /// use rustcraft::MODEL_MANAGER;
-    ///
-    /// let vertices = vec![
-    ///     0.5, 0.5, 0.0, 1.0, 0.0, 0.0, 1.0, 1.0, 0.5, -0.5, 0.0, 0.0, 1.0, 0.0, 1.0, 0.0, -0.5,
-    ///     -0.5, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, -0.5, 0.5, 0.0, 1.0, 1.0, 1.0, 0.0, 1.0,
-    /// ];
-    /// let indices = vec![0, 1, 2, 2, 3, 0];
-    /// MODEL_MANAGER.add_model("Face", vertices, indices, "3f;3f;2f");
-    /// ```
     pub fn add_model(&self, name: &str, model: Box<dyn Model + Send + 'static>) {
         self.apply(|manager| manager.add(name, model));
     }
 
+    /// 从文件中载入模型
+    ///
+    /// # 参数 Parameters
+    ///
+    /// - `path`: 模型文件路径
+    ///
+    /// # 注解 Note
+    ///
+    /// 此函数只有在 OpenGL 上下文激活后才能调用
+    ///
+    /// 目前仅支持从 JSON 文件中载入简单几何体模型：
+    /// 格式：
+    /// + 仅顶点数据模型
+    /// ```json
+    /// {
+    ///     "type": "array",
+    ///     "vertices": [...],
+    ///     "description": "..."
+    /// }
+    /// ```
+    /// 其中： vertices 为顶点数据，description 为顶点数据描述
+    /// + 含索引数据模型
+    /// ```json
+    /// {
+    ///     "type": "element",
+    ///     "vertices": [...],
+    ///     "indices": [...],
+    ///     "description": "..."
+    /// }
+    /// ```
+    /// 其中： vertices 为顶点数据，indices 为索引数据，description 为顶点数据描述
+    ///
+    /// 顶点数据结果描述的格式为： `[<num><type>;...]`
+    /// - num: 值个数
+    /// - type: 值类型
+    ///     + f: 单精度浮点数
+    ///     + i: 整型
+    ///     + u: 无符号整型
+    ///     + _: 一字节占位符
+    ///
+    /// 例如：`"3f;2f"`, `"3f;3f;2f"`
     pub fn load_from_file(&self, path: &str) {
         debug!("RCW<ModelManager>", "尝试载入模型 {}", path);
         let ext = if let Some(ext) = Path::new(path).extension() {

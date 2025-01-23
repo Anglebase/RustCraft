@@ -74,11 +74,28 @@ lazy_static! {
 }
 
 impl RustCraftWrapper<TextureManager> {
+    /// 加载指定目录下的纹理
+    ///
+    /// # 注解 Note
+    ///
+    /// 此函数只有在 OpenGL 上下文激活后才能调用
+    ///
+    /// # 参数 Parameters
+    /// * `path` - 目录路径
     pub fn load_from(&self, dir: &str) {
         debug!("RCW<TextureManager>", "正在从 {} 加载纹理", dir);
         self.apply(|tm| tm.load_from(dir));
     }
 
+    /// 将指定名称的纹理绑定到指定 ID
+    ///
+    /// # 注解 Note
+    ///
+    /// 此函数只有在 OpenGL 上下文激活后才能调用
+    ///
+    /// # 参数 Parameters
+    /// * `name` - 纹理名称
+    /// * `id` - 纹理 ID
     pub fn bind(&self, name: &str, id: u32) {
         self.apply(|tm| {
             if tm.textures.contains_key(name) {

@@ -258,7 +258,6 @@ impl App {
         debug!("App::exec()", "事件循环已退出");
     }
 
-    
     /// 获取当前渲染帧率
     pub fn fps() -> f32 {
         let mut fps = 0.0;
