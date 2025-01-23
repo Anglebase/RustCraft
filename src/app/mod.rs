@@ -1,16 +1,26 @@
 use crate::{camera::Camera, debug, error, info, RustCraftWrapper, CAMERA_SYSTEM};
 use glfw::*;
 use lazy_static::lazy_static;
-use std::{
-    sync::mpsc::{channel, Receiver},
-    thread::spawn,
-    time::Instant,
-};
+use std::{sync::mpsc::channel, thread::spawn, time::Instant};
 lazy_static! {
-    static ref DELTA_TIME: RustCraftWrapper<f32> = RustCraftWrapper::new(0.0);
+    static ref RENDER_DELTA_TIME: RustCraftWrapper<f32> = RustCraftWrapper::new(0.0);
+    static ref POLL_EVENT_DELTA_TIME: RustCraftWrapper<f32> = RustCraftWrapper::new(0.0);
     static ref UNIQUE_APP: RustCraftWrapper<Option<()>> = RustCraftWrapper::new(None);
     static ref APP_TIME: RustCraftWrapper<Instant> = RustCraftWrapper::new(Instant::now());
     static ref WINDOW_SIZE: RustCraftWrapper<(i32, i32)> = RustCraftWrapper::new((0, 0));
+    static ref WINDOW: RustCraftWrapper<Option<PWindow>> = RustCraftWrapper::new(None);
+}
+
+impl RustCraftWrapper<Option<PWindow>> {
+    pub fn should_close(&self) -> bool {
+        let mut ret = false;
+        self.apply(|w| {
+            if let Some(window) = w {
+                ret = window.should_close()
+            }
+        });
+        ret
+    }
 }
 
 /// 应用程序构建器
@@ -209,42 +219,43 @@ impl AppBuilder {
         });
         if self.fix_cursor {
             window.set_cursor_mode(CursorMode::Disabled);
+            CAMERA_SYSTEM.enable_mouse(false);
         }
+        WINDOW.apply(move |w| {
+            *w = Some(window);
+        });
         if self.vsync {
             glfw.set_swap_interval(SwapInterval::Sync(1));
         }
         debug!("App::new()", "启动 GLFW 渲染线程 ...");
-        let (tx, rx) = channel();
-        let (initialized_tx, initialized_rx) = channel();
-        let (return_tx, return_rx) = channel();
         let render_init_func = self.render_init_func.take();
         let mut render_loop_func = self.render_loop_func.take();
-        let mut event_callback = self.event_callback.take();
+        let (init_tx, init_rx) = channel();
+        // 渲染线程
         spawn(move || {
             debug!("App::new()/render", "GLFW 渲染线程已启动");
             debug!("App::new()/render", "正在初始化 OpenGL 上下文 ...");
-            window.make_current();
-            debug!("App::new()/render", "加载 OpenGL 函数指针 ...");
-            gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
-            gl::Viewport::load_with(|symbol| window.get_proc_address(symbol) as *const _);
+            WINDOW.apply(|w| {
+                let window = w.as_mut().unwrap();
+                window.make_current();
+                debug!("App::new()/render", "加载 OpenGL 函数指针 ...");
+                gl::load_with(|symbol| window.get_proc_address(symbol) as *const _);
+                gl::Viewport::load_with(|symbol| window.get_proc_address(symbol) as *const _);
+            });
             debug!("App::new()/render", "初始化渲染依赖 ...");
             // 初始化渲染依赖
             if let Some(func) = render_init_func {
                 func();
             }
-            // 暂时借出所有权
-            initialized_tx.send(window).unwrap();
-            let mut window: PWindow = return_rx.recv().unwrap();
+            init_tx.send(()).unwrap();
             debug!("App::new()/render", "启动渲染循环 ...");
             // FPS 计数器
             let mut now = std::time::Instant::now();
-            while !window.should_close() {
-                // 允许处理事件
-                tx.send(()).unwrap();
+            while !WINDOW.should_close() {
                 // 计算此帧渲染时间
                 let dt = now.elapsed().as_secs_f32();
                 now = std::time::Instant::now();
-                DELTA_TIME.apply(|data| {
+                RENDER_DELTA_TIME.apply(|data| {
                     *data = dt;
                 });
                 // 更新窗口尺寸
@@ -255,42 +266,66 @@ impl AppBuilder {
                 if let Some(func) = render_loop_func.as_mut() {
                     func();
                 }
-                window.swap_buffers();
-                // 处理事件
-                CAMERA_SYSTEM.apply(|sys| {
-                    sys.update(&mut window);
+                // 交换缓冲区
+                WINDOW.apply(|w| {
+                    w.as_mut().unwrap().swap_buffers();
                 });
-                if let Some(func) = event_callback.as_mut() {
-                    func(&mut window);
-                }
             }
             debug!("App::new()/render", "渲染线程已退出");
             info!("App", "程序即将退出");
         });
-        {
-            // 当渲染线程初始化完成后，显示 GLFW 窗口
-            let mut window = initialized_rx.recv().unwrap();
-            info!("App", "初始化已完成");
-            debug!("App::new()", "显示 GLFW 窗口 ...");
-            window.show();
-            return_tx.send(window).unwrap();
-        }
-        debug!("App::new()", "GLFW 渲染线程已初始化");
-        App { glfw, rx }
+        let mut event_callback = self.event_callback.take();
+        init_rx.recv().unwrap();
+        info!("App", "初始化已完成");
+        // 事件轮询线程
+        spawn(move || {
+            debug!("App::new()/event", "启动 GLFW 事件轮询线程 ...");
+            let mut now = std::time::Instant::now();
+            while !WINDOW.should_close() {
+                // 计算此帧事件轮询时间
+                let dt = now.elapsed().as_secs_f32();
+                now = std::time::Instant::now();
+                POLL_EVENT_DELTA_TIME.apply(|data| {
+                    *data = dt;
+                });
+                // 处理事件
+                WINDOW.apply(|w| {
+                    if let Some(window) = w.as_mut() {
+                        CAMERA_SYSTEM.apply(|sys| {
+                            sys.update(window);
+                        });
+                        if let Some(func) = event_callback.as_mut() {
+                            func(window);
+                        }
+                    }
+                });
+            }
+        });
+        // 当渲染线程初始化完成后，显示 GLFW 窗口
+        debug!("App::new()", "显示 GLFW 窗口 ...");
+        WINDOW.apply(|w| {
+            w.as_mut().unwrap().show();
+        });
+        debug!("App::new()", "应用程序已启动");
+        App { glfw }
     }
 }
 
 /// 应用程序结构体
 pub struct App {
     glfw: Glfw,
-    rx: Receiver<()>,
+}
+
+pub enum TimeType {
+    Render,
+    PollEvent,
 }
 
 impl App {
     /// 启动事件循环
     pub fn exec(&mut self) {
         debug!("App::exec()", "启动事件循环 ...");
-        while let Ok(()) = self.rx.recv() {
+        while !WINDOW.should_close() {
             self.glfw.poll_events();
         }
         debug!("App::exec()", "事件循环已退出");
@@ -299,18 +334,27 @@ impl App {
     /// 获取当前渲染帧率
     pub fn fps() -> f32 {
         let mut fps = 0.0;
-        DELTA_TIME.apply(|data| {
+        RENDER_DELTA_TIME.apply(|data| {
             fps = 1.0 / *data;
         });
         fps
     }
 
     /// 获取当前帧渲染时间
-    pub fn delta_time() -> f32 {
+    pub fn delta_time(t_type: TimeType) -> f32 {
         let mut dt = 0.0;
-        DELTA_TIME.apply(|data| {
-            dt = *data;
-        });
+        match t_type {
+            TimeType::Render => {
+                RENDER_DELTA_TIME.apply(|data| {
+                    dt = *data;
+                });
+            }
+            TimeType::PollEvent => {
+                POLL_EVENT_DELTA_TIME.apply(|data| {
+                    dt = *data;
+                });
+            }
+        };
         dt
     }
 
