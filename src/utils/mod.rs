@@ -107,7 +107,7 @@ pub fn look_at(eye: Vec3<f32>, target: Vec3<f32>, up: Vec3<f32>) -> Mat4<f32> {
         [0.0, 0.0, 0.0, 1.0],
     ];
 
-    Mat4::from(translation) * Mat4::from(rotation)
+    Mat4::from(rotation) * Mat4::from(translation)
 }
 
 /// 生成透视投影矩阵
