@@ -1,6 +1,15 @@
 use glfw::*;
-use rustcraft::{debug, log::*, utils::Mat4, *};
+use lazy_static::lazy_static;
+use rustcraft::{camera::Camera, debug, log::*, utils::Mat4, *};
 use utils::{look_at, perspective, radian, rotate3, tranlate3, Vec3};
+
+lazy_static! {
+    static ref CAMERA: RustCraftWrapper<Camera> = RustCraftWrapper::new(Camera::new(
+        Vec3::new(0.0, 0.0, 3.0),
+        Vec3::new(0.0, 0.0, -1.0),
+        Vec3::new(0.0, 1.0, 0.0),
+    ));
+}
 
 pub fn key_callback(window: &mut Window, key: Key, scancode: i32, action: Action, mods: Modifiers) {
     match (key, action) {
@@ -30,11 +39,14 @@ fn render_loop() {
         gl::ClearColor(0.3, 0.5, 0.4, 1.0);
         gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
     }
-    let view = look_at(
+    let mut view = look_at(
         Vec3::new(0.0, 0.0, 3.0),
         Vec3::new(0.0, 0.0, 0.0),
         Vec3::new(0.0, 1.0, 0.0),
     );
+    CAMERA.apply(|c| {
+        view = c.view_matrix();
+    });
     let (w, h) = App::window_size();
     let proj = perspective(radian(45.0), w as f32 / h as f32, 0.1, 100.0);
 
@@ -50,6 +62,19 @@ fn render_loop() {
     MODEL_MANAGER.draw_model("cube");
 }
 
+fn event(window: &mut Window) {
+    CAMERA.apply(|c| {
+        c.update(window);
+    });
+}
+
+fn mouse_move(window: &mut Window, xpos: f64, ypos: f64) {
+    CAMERA.apply(|c| {
+        c.mouse_update(xpos as f32, ypos as f32);
+    });
+    let _ = (window, xpos, ypos);
+}
+
 fn main() {
     Log::set_level(Level::Debug);
 
@@ -57,6 +82,9 @@ fn main() {
         .set_render_init_callback(render_init)
         .set_render_loop_callback(render_loop)
         .set_key_callback(key_callback)
+        .set_event_callback(event)
+        .set_cursor_pos_callback(mouse_move)
+        .disable_cursor()
         .build();
     app.exec();
 }

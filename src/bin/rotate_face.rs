@@ -23,7 +23,10 @@ fn render_loop() {
     let proj = perspective(radian(45.0), 800.0 / 600.0, 0.1, 100.0);
 
     let shader = SHADER_MANAGER.get("face").unwrap();
-    let model: Mat4<f32> = rotate3(radian(App::time() * 100.0), Vec3::new(0.0, -1.0, -1.0));
+    let model: Mat4<f32> = rotate3(
+        radian(App::time() * 100.0),
+        Vec3::new(0.0, -1.0, -1.0),
+    );
     shader.use_program();
     shader.set_uniform("trans", model);
     shader.set_uniform("view", view);
@@ -35,8 +38,9 @@ fn render_loop() {
 
 fn main() {
     Log::set_level(Level::Debug);
-    App::set_render_init_callback(render_init);
-    App::set_render_loop_callback(render_loop);
-    let mut app = App::new(800, 600, "RustCraft");
+    let mut app = AppBuilder::new(800, 600, "RustCraft")
+        .set_render_init_callback(render_init)
+        .set_render_loop_callback(render_loop)
+        .build();
     app.exec();
 }
