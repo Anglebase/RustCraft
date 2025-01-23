@@ -244,7 +244,7 @@ impl<T, const M: usize, const N: usize> Mat<T, M, N>
 where
     T: Copy + Default,
 {
-    /// 转置矩阵
+    /// 生成当前矩阵的转置矩阵
     pub fn transpose(&self) -> Mat<T, N, M> {
         let mut result = Mat::<T, N, M>::new();
         for i in 0..M {
@@ -260,7 +260,7 @@ impl<T, const M: usize> Mat<T, M, M>
 where
     T: Copy + From<f32>,
 {
-    /// 单位矩阵
+    /// 生成单位矩阵
     #[allow(non_snake_case)]
     pub fn I() -> Self {
         let mut result = Self {
@@ -274,12 +274,15 @@ where
 }
 
 impl<T, const M: usize, const N: usize> Mat<T, M, N> {
+    /// 返回矩阵的行数
     pub fn rows(&self) -> usize {
         M
     }
+    /// 返回矩阵的列数
     pub fn cols(&self) -> usize {
         N
     }
+    /// 返回矩阵的元素个数
     pub fn count(&self) -> usize {
         M * N
     }

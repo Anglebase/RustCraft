@@ -3,6 +3,7 @@ pub mod texture;
 use crate::debug;
 use texture::Texture;
 
+/// 纹理资源管理器
 pub struct TextureManager {
     textures: HashMap<String, Texture>,
 }
@@ -14,6 +15,14 @@ impl TextureManager {
         }
     }
 
+    /// 加载指定目录下的纹理
+    /// 
+    /// # 参数 Parameters
+    /// * `dir` - 目录路径
+    /// 
+    /// # 注解 Note
+    /// 
+    /// 加载的纹理将以它的文件名作为名称存储在管理器中
     pub fn load_from(&mut self, dir: &str) {
         use std::fs::*;
         let entries = if let Ok(entries) = read_dir(dir) {

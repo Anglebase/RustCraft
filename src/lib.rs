@@ -14,7 +14,8 @@ pub use model::MODEL_MANAGER;
 pub use shader::SHADER_MANAGER;
 pub use texture::TEXTURE_MANAGER;
 
-/// 全局对象包装器，它利用 Mutex 的内部可变性实现全局对象的简洁访问
+/// 全局对象包装器
+/// 它利用 Mutex 的内部可变性实现全局对象的简洁访问
 pub struct RustCraftWrapper<T> {
     data: Mutex<T>,
 }

@@ -42,20 +42,57 @@ where
     }
 }
 
+/// 生成二维旋转变换矩阵
+/// 
+/// # 参数 
+/// 
+/// - `angle` 旋转角度，单位为弧度
+/// 
+/// # 返回值 
+/// 
+/// 旋转矩阵
 pub fn rotate2(angle: f32) -> Mat3<f32> {
     let c = angle.cos();
     let s = angle.sin();
     Mat3::from([[c, -s, 0.0], [s, c, 0.0], [0.0, 0.0, 1.0]])
 }
 
+/// 生成二维平移变换矩阵
+/// 
+/// # 参数 
+/// 
+/// - `v` 平移向量
+/// 
+/// # 返回值 
+/// 
+/// 平移矩阵
 pub fn tranlate2(v: Vec2<f32>) -> Mat3<f32> {
     Mat3::from([[1.0, 0.0, *v.x()], [0.0, 1.0, *v.y()], [0.0, 0.0, 1.0]])
 }
 
+/// 生成二维缩放变换矩阵
+/// 
+/// # 参数 
+/// 
+/// - `v` 缩放因子
+/// 
+/// # 返回值 
+/// 
+/// 缩放矩阵
 pub fn scale2(v: Vec2<f32>) -> Mat3<f32> {
     Mat3::from([[*v.x(), 0.0, 0.0], [0.0, *v.y(), 0.0], [0.0, 0.0, 1.0]])
 }
 
+/// 生成三维旋转变换矩阵
+/// 
+/// # 参数 
+/// 
+/// - `angle` 旋转角度，单位为弧度
+/// - `axis` 旋转轴
+/// 
+/// # 返回值 
+/// 
+/// 旋转矩阵
 pub fn rotate3(angle: f32, axis: Vec3<f32>) -> Mat4<f32> {
     let mut result = Mat4::I();
     let axis = axis.normalize();
@@ -75,6 +112,15 @@ pub fn rotate3(angle: f32, axis: Vec3<f32>) -> Mat4<f32> {
     result
 }
 
+/// 生成三维平移变换矩阵
+/// 
+/// # 参数 
+/// 
+/// - `v` 平移向量
+/// 
+/// # 返回值 
+/// 
+/// 平移矩阵
 pub fn tranlate3(v: Vec3<f32>) -> Mat4<f32> {
     Mat4::from([
         [1.0, 0.0, 0.0, *v.x()],
@@ -84,6 +130,15 @@ pub fn tranlate3(v: Vec3<f32>) -> Mat4<f32> {
     ])
 }
 
+/// 生成三维缩放变换矩阵
+/// 
+/// # 参数 
+/// 
+/// - `v` 缩放因子
+/// 
+/// # 返回值 
+/// 
+/// 缩放矩阵
 pub fn scale3(v: Vec3<f32>) -> Mat4<f32> {
     Mat4::from([
         [*v.x(), 0.0, 0.0, 0.0],
@@ -93,6 +148,15 @@ pub fn scale3(v: Vec3<f32>) -> Mat4<f32> {
     ])
 }
 
+/// 生成三维绕x轴旋转变换矩阵
+/// 
+/// # 参数 
+/// 
+/// - `angle` 旋转角度，单位为弧度
+/// 
+/// # 返回值 
+/// 
+/// 旋转矩阵
 pub fn rotate3_x(angle: f32) -> Mat4<f32> {
     let c = angle.cos();
     let s = angle.sin();
@@ -104,6 +168,15 @@ pub fn rotate3_x(angle: f32) -> Mat4<f32> {
     ])
 }
 
+/// 生成三维绕y轴旋转变换矩阵
+/// 
+/// # 参数 
+/// 
+/// - `angle` 旋转角度，单位为弧度
+/// 
+/// # 返回值 
+/// 
+/// 旋转矩阵
 pub fn rotate3_y(angle: f32) -> Mat4<f32> {
     let c = angle.cos();
     let s = angle.sin();
@@ -115,6 +188,15 @@ pub fn rotate3_y(angle: f32) -> Mat4<f32> {
     ])
 }
 
+/// 生成三维绕z轴旋转变换矩阵
+/// 
+/// # 参数 
+/// 
+/// - `angle` 旋转角度，单位为弧度
+/// 
+/// # 返回值 
+/// 
+/// 旋转矩阵
 pub fn rotate3_z(angle: f32) -> Mat4<f32> {
     let c = angle.cos();
     let s = angle.sin();

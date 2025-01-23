@@ -4,6 +4,7 @@ use json::JsonValue;
 
 use super::Model;
 
+/// 含索引数据模型
 pub struct ElementModel {
     vertices: Vec<f32>,
     indices: Vec<u32>,

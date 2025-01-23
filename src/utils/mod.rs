@@ -1,3 +1,4 @@
+/// 设置着色器uniform变量的trait
 pub trait SetUniform {
     fn give(&self, location: i32);
 }
@@ -43,10 +44,51 @@ mod uniform_i32;
 mod uniform_u32;
 pub use types::*;
 
+/// 角度制转弧度制
+/// 
+/// # 参数
+/// 
+/// - `degrees` 角度制角度
+/// 
+/// # 返回值
+/// 
+/// 弧度制角度
+/// 
+/// # 示例
+/// 
+/// ```
+/// use rustcraft::utils::radian;
+/// 
+/// let radian = radian(90.0);
+/// assert_eq!(radian, std::f32::consts::PI / 2.0);
+/// ```
 pub fn radian(degrees: f32) -> f32 {
     degrees * std::f32::consts::PI / 180.0
 }
 
+/// 生成摄像机位置变换矩阵
+/// 
+/// # 参数
+/// 
+/// - `eye` 摄像机位置
+/// - `target` 目标位置
+/// - `up` 上向量
+/// 
+/// # 返回值
+/// 
+/// 位置变换矩阵
+/// 
+/// # 示例
+/// 
+/// ```
+/// use rustcraft::utils::look_at;
+/// use rustcraft::utils::Vec3;
+/// 
+/// let eye = Vec3::from([0.0, 0.0, 1.0]);
+/// let target = Vec3::from([0.0, 0.0, 0.0]);
+/// let up = Vec3::from([0.0, 1.0, 0.0]);
+/// let matrix = look_at(eye, target, up);
+/// ```
 pub fn look_at(eye: Vec3<f32>, target: Vec3<f32>, up: Vec3<f32>) -> Mat4<f32> {
     let z = (eye - target).normalize(); // 计算z轴方向向量
     let x = up.cross(z).normalize(); // 计算x轴方向向量
@@ -68,6 +110,26 @@ pub fn look_at(eye: Vec3<f32>, target: Vec3<f32>, up: Vec3<f32>) -> Mat4<f32> {
     Mat4::from(translation) * Mat4::from(rotation)
 }
 
+/// 生成透视投影矩阵
+/// 
+/// # 参数
+/// 
+/// - `fov` 视角
+/// - `aspect` 纵横比
+/// - `z_near` 近裁切面
+/// - `z_far` 远裁切面
+/// 
+/// # 返回值
+/// 
+/// 透视投影矩阵
+/// 
+/// # 示例
+/// 
+/// ```
+/// use rustcraft::utils::perspective;
+/// 
+/// let matrix = perspective(45.0, 1.0, 0.1, 100.0);
+/// ```
 pub fn perspective(fov: f32, aspect: f32, z_near: f32, z_far: f32) -> Mat4<f32> {
     let f = 1.0 / (fov / 2.0).tan();
     let mut result = [[0.0; 4]; 4];

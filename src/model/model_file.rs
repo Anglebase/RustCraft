@@ -1,5 +1,6 @@
 use super::{array_model::ArrayModel, element_model::ElementModel, Model};
 
+/// 从 JSON 文件中加载模型
 pub fn load_from_json(path: &str) -> Result<(String, Box<dyn Model + Send + 'static>), String> {
     let string = match std::fs::read_to_string(path) {
         Ok(string) => string,

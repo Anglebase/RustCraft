@@ -7,6 +7,7 @@ mod array_model;
 mod element_model;
 mod model_file;
 
+/// 模型接口
 pub trait Model {
     fn draw(&self);
 }
@@ -140,6 +141,10 @@ impl RustCraftWrapper<ModelManager> {
     /// # 参数 Parameters
     ///
     /// - `name`: 模型名称
+    /// 
+    /// # 注解 Note
+    ///
+    /// 此函数只有在 OpenGL 上下文激活后才能调用
     pub fn draw_model(&self, name: &str) {
         self.apply(|manager| {
             if let Some(model) = manager.get(name) {

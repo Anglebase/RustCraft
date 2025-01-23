@@ -4,6 +4,7 @@ use json::JsonValue;
 
 use super::Model;
 
+/// 仅顶点数据模型
 pub struct ArrayModel {
     vertices: Vec<f32>,
     vao: GLuint,

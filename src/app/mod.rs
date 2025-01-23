@@ -13,6 +13,7 @@ lazy_static! {
     static ref WINDOW_SIZE: RustCraftWrapper<(i32, i32)> = RustCraftWrapper::new((0, 0));
 }
 
+/// 应用程序构建器
 pub struct AppBuilder {
     size: (u32, u32),
     title: String,
@@ -22,6 +23,7 @@ pub struct AppBuilder {
     key_callback: Option<Box<dyn FnMut(&mut Window, Key, i32, Action, Modifiers) + Send + 'static>>,
     event_callback: Option<Box<dyn FnMut(&mut Window) + Send + 'static>>,
     cursor_pos_callback: Option<Box<dyn FnMut(&mut Window, f64, f64) + Send + 'static>>,
+    scroll_callback: Option<Box<dyn FnMut(&mut Window, f64, f64) + Send + 'static>>,
     fix_cursor: bool,
 }
 
@@ -35,6 +37,7 @@ impl Default for AppBuilder {
             key_callback: None,
             event_callback: None,
             cursor_pos_callback: None,
+            scroll_callback: None,
             fix_cursor: false,
         }
     }
@@ -127,6 +130,8 @@ impl AppBuilder {
     /// 返回 `App` 实例
     ///
     /// # 注解 Note
+    /// 
+    /// 在应用程序周期内，此函数只能调用一次
     pub fn build(&mut self) -> App {
         UNIQUE_APP.apply(|data| {
             if data.is_some() {
@@ -158,6 +163,7 @@ impl AppBuilder {
             let (w, h) = window.get_size();
             window.set_pos((mode.width - w) / 2, (mode.height - h) / 2);
         }
+        // 设置 GLFW 窗口回调函数
         if self.key_callback.is_some() {
             let func = self.key_callback.take().unwrap();
             window.set_key_callback(func);
@@ -165,6 +171,10 @@ impl AppBuilder {
         if self.cursor_pos_callback.is_some() {
             let func = self.cursor_pos_callback.take().unwrap();
             window.set_cursor_pos_callback(func);
+        }
+        if self.scroll_callback.is_some() {
+            let func = self.scroll_callback.take().unwrap();
+            window.set_scroll_callback(func);
         }
         let (size_tx, size_rx) = channel();
         window.set_size_callback(move |_, w, h| {
@@ -243,6 +253,7 @@ impl AppBuilder {
     }
 }
 
+/// 应用程序结构体
 pub struct App {
     glfw: Glfw,
     rx: Receiver<()>,
@@ -276,7 +287,7 @@ impl App {
         dt
     }
 
-    /// 获取程序运行时间
+    /// 获取程序运行时间(自应用程序启动开始, 以秒计)
     pub fn time() -> f32 {
         let mut t = 0.0;
         APP_TIME.apply(|data| {
@@ -285,6 +296,7 @@ impl App {
         t
     }
 
+    /// 获取当前窗口尺寸
     pub fn window_size() -> (i32, i32) {
         let mut size = (0, 0);
         WINDOW_SIZE.apply(|data| {

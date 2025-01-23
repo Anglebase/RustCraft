@@ -11,7 +11,7 @@ pub struct Shader {
 }
 
 impl Shader {
-    /// 应用着色器程序
+    /// 向当前上下文应用着色器程序
     pub fn use_program(&self) {
         unsafe {
             gl_utils::use_program(self.program);
