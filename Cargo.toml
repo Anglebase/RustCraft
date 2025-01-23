@@ -1,6 +1,6 @@
 [package]
 name = "rustcraft"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 license = "MIT"
 description = "一个 Rust 下的 OpenGL 集成框架|An OpenGL integration framework in Rust"
