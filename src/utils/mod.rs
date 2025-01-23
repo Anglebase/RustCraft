@@ -152,10 +152,38 @@ pub fn rotate3(angle: f32, axis: Vec3<f32>) -> Mat4<f32> {
     result
 }
 
+/// 角度转弧度
+///
+/// # 示例 Examples
+///
+/// ```
+/// use rustcraft::utils::radian;
+///
+/// let rad = radian(90.0);
+/// ```
 pub fn radian(angle: f32) -> f32 {
     angle * std::f32::consts::PI / 180.0
 }
 
+/// 生成摄像机矩阵
+///
+/// # 参数 Parameters
+///
+/// - `eye` - 摄像机位置
+/// - `target` - 目标位置
+/// - `up` - 上方向
+///
+/// # 示例 Examples
+///
+/// ```
+/// use rustcraft::utils::Vec3;
+/// use rustcraft::utils::look_at;
+///
+/// let eye = Vec3::new(0.0, 0.0, 1.0);
+/// let target = Vec3::new(0.0, 0.0, 0.0);
+/// let up = Vec3::new(0.0, 1.0, 0.0);
+/// let mat = look_at(eye, target, up);
+/// ```
 pub fn look_at(eye: Vec3<f32>, target: Vec3<f32>, up: Vec3<f32>) -> Mat4<f32> {
     let z = (eye - target).normalize(); // 计算z轴方向向量
     let x = up.cross(z).normalize(); // 计算x轴方向向量
@@ -177,6 +205,22 @@ pub fn look_at(eye: Vec3<f32>, target: Vec3<f32>, up: Vec3<f32>) -> Mat4<f32> {
     Mat4::from(translation) * Mat4::from(rotation)
 }
 
+/// 生成透视投影矩阵
+///
+/// # 参数 Parameters
+///
+/// - `angle` - 视角
+/// - `aspect` - 纵横比
+/// - `z_near` - 近裁剪面
+/// - `z_far` - 远裁剪面
+///
+/// # 示例 Examples
+///
+/// ```
+/// use rustcraft::utils::perspective;
+///
+/// let mat = perspective(90.0, 1.0, 0.1, 100.0);
+/// ```
 pub fn perspective(angle: f32, aspect: f32, z_near: f32, z_far: f32) -> Mat4<f32> {
     let f = 1.0 / (angle / 2.0).tan();
     let mut result = [[0.0; 4]; 4];
@@ -189,3 +233,4 @@ pub fn perspective(angle: f32, aspect: f32, z_near: f32, z_far: f32) -> Mat4<f32
 
     Mat4::<f32>::from(result)
 }
+

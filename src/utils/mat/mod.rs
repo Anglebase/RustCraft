@@ -1,16 +1,22 @@
 mod mat2;
+mod mat2x3;
+mod mat2x4;
 mod mat3;
+mod mat3x2;
+mod mat3x4;
 mod mat4;
-// pub mod mat2x3;
-// pub mod mat3x2;
-// pub mod mat2x4;
-// pub mod mat4x2;
-// pub mod mat3x4;
-// pub mod mat4x3;
+mod mat4x2;
+mod mat4x3;
 
 pub use mat2::Mat2;
+pub use mat2x3::Mat2x3;
+pub use mat2x4::Mat2x4;
 pub use mat3::Mat3;
+pub use mat3x2::Mat3x2;
+pub use mat3x4::Mat3x4;
 pub use mat4::Mat4;
+pub use mat4x2::Mat4x2;
+pub use mat4x3::Mat4x3;
 
 #[macro_export]
 macro_rules! impl_mat_ops_add {
@@ -83,7 +89,7 @@ macro_rules! impl_mat_mul_mat {
             T: Copy + From<f32>,
             T: std::ops::Mul<Output = T> + std::ops::AddAssign,
         {
-            type Output = Self;
+            type Output = $retype;
 
             fn mul(self, other: $type2) -> Self::Output {
                 let mut result = <$retype>::default();
@@ -219,3 +225,32 @@ macro_rules! impl_mat_ops_div_assign_number {
         }
     };
 }
+
+impl_mat_mul_mat!(Mat2x3<T>, 2, 3, Mat3x2<T>, 3, 2, Mat2<T>);
+impl_mat_mul_mat!(Mat3x4<T>, 3, 4, Mat4x3<T>, 4, 3, Mat3<T>);
+impl_mat_mul_mat!(Mat2x4<T>, 2, 4, Mat4x2<T>, 4, 2, Mat2<T>);
+impl_mat_mul_mat!(Mat4x3<T>, 4, 3, Mat3x4<T>, 3, 4, Mat4<T>);
+impl_mat_mul_mat!(Mat3x2<T>, 3, 2, Mat2x3<T>, 2, 3, Mat3<T>);
+impl_mat_mul_mat!(Mat4x2<T>, 4, 2, Mat2x4<T>, 2, 4, Mat4<T>);
+impl_mat_mul_mat!(Mat2x3<T>, 2, 3, Mat3<T>, 3, 1, Mat2x3<T>);
+impl_mat_mul_mat!(Mat3x4<T>, 3, 4, Mat4<T>, 4, 1, Mat3x4<T>);
+impl_mat_mul_mat!(Mat2x4<T>, 2, 4, Mat4<T>, 4, 1, Mat2x4<T>);
+impl_mat_mul_mat!(Mat4x3<T>, 4, 3, Mat3<T>, 3, 1, Mat4x3<T>);
+impl_mat_mul_mat!(Mat3x2<T>, 3, 2, Mat2<T>, 2, 1, Mat3x2<T>);
+impl_mat_mul_mat!(Mat4x2<T>, 4, 2, Mat2<T>, 2, 1, Mat4x2<T>);
+impl_mat_mul_mat!(Mat2x3<T>, 2, 3, Mat3x4<T>, 4, 3, Mat2x4<T>);
+impl_mat_mul_mat!(Mat3x4<T>, 3, 4, Mat4x2<T>, 2, 4, Mat3x2<T>);
+impl_mat_mul_mat!(Mat2x4<T>, 2, 4, Mat4x3<T>, 3, 4, Mat2x3<T>);
+impl_mat_mul_mat!(Mat4x3<T>, 4, 3, Mat3x2<T>, 2, 3, Mat4x2<T>);
+impl_mat_mul_mat!(Mat3x2<T>, 3, 2, Mat2x4<T>, 4, 2, Mat3x4<T>);
+impl_mat_mul_mat!(Mat4x2<T>, 4, 2, Mat2x3<T>, 3, 2, Mat4x3<T>);
+impl_mat_mul_mat!(Mat2x3<T>, 2, 3, Mat4x3<T>, 4, 3, Mat2x4<T>);
+impl_mat_mul_mat!(Mat3x4<T>, 3, 4, Mat2x4<T>, 2, 4, Mat3x2<T>);
+impl_mat_mul_mat!(Mat2x4<T>, 2, 4, Mat3x4<T>, 3, 4, Mat2x3<T>);
+impl_mat_mul_mat!(Mat4x3<T>, 4, 3, Mat2x3<T>, 2, 3, Mat4x2<T>);
+impl_mat_mul_mat!(Mat3x2<T>, 3, 2, Mat4x2<T>, 4, 2, Mat3x4<T>);
+impl_mat_mul_mat!(Mat4x2<T>, 4, 2, Mat3x2<T>, 3, 2, Mat4x3<T>);
+impl_mat_mul_mat!(Mat2x3<T>, 2, 3, Mat4x2<T>, 4, 2, Mat2x4<T>);
+impl_mat_mul_mat!(Mat3x4<T>, 3, 4, Mat2x3<T>, 2, 3, Mat3x2<T>);
+impl_mat_mul_mat!(Mat4x3<T>, 4, 3, Mat2x4<T>, 2, 4, Mat4x2<T>);
+impl_mat_mul_mat!(Mat3x2<T>, 3, 2, Mat4x3<T>, 4, 3, Mat3x4<T>);

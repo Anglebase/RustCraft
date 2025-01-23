@@ -1,6 +1,6 @@
 use crate::{utils::SetUniform, *};
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Vec2<T> {
     pub x: T,
     pub y: T,
