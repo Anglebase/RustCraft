@@ -52,7 +52,7 @@ macro_rules! impl_vec_ops_mul_number {
 }
 
 #[macro_export]
-macro_rules! impl_vec_mul_vec {
+macro_rules! impl_vec_ops_mul_vec {
     ($type:ty, $($field:ident),+) => {
         impl<T> std::ops::Mul for $type
         where
@@ -66,6 +66,88 @@ macro_rules! impl_vec_mul_vec {
                     result += self.$field.into() * other.$field.into();
                 )+
                 result
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! impl_vec_ops_div_number {
+    ($type:ty, $($field:ident),+) => {
+        impl<T: std::ops::Div<Output = T> + Copy> std::ops::Div<T> for $type {
+            type Output = Self;
+
+            fn div(self, other: T) -> Self {
+                Self {
+                    $($field: self.$field / other,)+
+                }
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! impl_vec_ops_neg {
+    ($type:ty, $($field:ident),+) => {
+        impl<T: std::ops::Neg<Output = T> + Copy> std::ops::Neg for $type {
+            type Output = Self;
+
+            fn neg(self) -> Self {
+                Self {
+                    $($field: -self.$field,)+
+                }
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! impl_vec_ops_add_assign {
+    ($type:ty, $($field:ident),+) => {
+        impl<T: std::ops::AddAssign + Copy> std::ops::AddAssign for $type {
+            fn add_assign(&mut self, other: Self) {
+                $(
+                    self.$field += other.$field;
+                )+
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! impl_vec_ops_sub_assign {
+    ($type:ty, $($field:ident),+) => {
+        impl<T: std::ops::SubAssign + Copy> std::ops::SubAssign for $type {
+            fn sub_assign(&mut self, other: Self) {
+                $(
+                    self.$field -= other.$field;
+                )+
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! impl_vec_ops_mul_assign_number {
+    ($type:ty, $($field:ident),+) => {
+        impl<T: std::ops::MulAssign + Copy> std::ops::MulAssign<T> for $type {
+            fn mul_assign(&mut self, other: T) {
+                $(
+                    self.$field *= other;
+                )+
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! impl_vec_ops_div_assign_number {
+    ($type:ty, $($field:ident),+) => {
+        impl<T: std::ops::DivAssign + Copy> std::ops::DivAssign<T> for $type {
+            fn div_assign(&mut self, other: T) {
+                $(
+                    self.$field /= other;
+                )+
             }
         }
     };

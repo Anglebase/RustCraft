@@ -121,3 +121,101 @@ macro_rules! impl_mat_index {
         }
     };
 }
+
+#[macro_export]
+macro_rules! impl_mat_ops_div_number {
+    ($type:ty, $rows:expr, $cols:expr) => {
+        impl<T: Copy + std::ops::Div<Output = T> + From<f32>> std::ops::Div<T> for $type {
+            type Output = Self;
+
+            fn div(self, other: T) -> Self::Output {
+                let mut result = Self::default();
+                for i in 0..$rows {
+                    for j in 0..$cols {
+                        result.data[i][j] = self.data[i][j] / other;
+                    }
+                }
+                result
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! impl_mat_ops_neg {
+    ($type:ty, $rows:expr, $cols:expr) => {
+        impl<T: Copy + std::ops::Neg<Output = T> + From<f32>> std::ops::Neg for $type {
+            type Output = Self;
+
+            fn neg(self) -> Self::Output {
+                let mut result = Self::default();
+                for i in 0..$rows {
+                    for j in 0..$cols {
+                        result.data[i][j] = -self.data[i][j];
+                    }
+                }
+                result
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! impl_mat_ops_add_assign {
+    ($type:ty, $rows:expr, $cols:expr) => {
+        impl<T: Copy + std::ops::AddAssign + From<f32>> std::ops::AddAssign for $type {
+            fn add_assign(&mut self, other: Self) {
+                for i in 0..$rows {
+                    for j in 0..$cols {
+                        self.data[i][j] += other.data[i][j];
+                    }
+                }
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! impl_mat_ops_sub_assign {
+    ($type:ty, $rows:expr, $cols:expr) => {
+        impl<T: Copy + std::ops::SubAssign + From<f32>> std::ops::SubAssign for $type {
+            fn sub_assign(&mut self, other: Self) {
+                for i in 0..$rows {
+                    for j in 0..$cols {
+                        self.data[i][j] -= other.data[i][j];
+                    }
+                }
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! impl_mat_ops_mul_assign_number {
+    ($type:ty, $rows:expr, $cols:expr) => {
+        impl<T: Copy + std::ops::MulAssign + From<f32>> std::ops::MulAssign<T> for $type {
+            fn mul_assign(&mut self, other: T) {
+                for i in 0..$rows {
+                    for j in 0..$cols {
+                        self.data[i][j] *= other;
+                    }
+                }
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! impl_mat_ops_div_assign_number {
+    ($type:ty, $rows:expr, $cols:expr) => {
+        impl<T: Copy + std::ops::DivAssign + From<f32>> std::ops::DivAssign<T> for $type {
+            fn div_assign(&mut self, other: T) {
+                for i in 0..$rows {
+                    for j in 0..$cols {
+                        self.data[i][j] /= other;
+                    }
+                }
+            }
+        }
+    };
+}

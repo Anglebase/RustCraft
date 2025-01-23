@@ -1,7 +1,4 @@
-use crate::{
-    impl_mat_index, impl_mat_mul_mat, impl_mat_ops_add, impl_mat_ops_mul_number, impl_mat_ops_sub,
-    utils::SetUniform,
-};
+use crate::{utils::*, *};
 
 #[derive(Debug, Clone, Copy)]
 pub struct Mat2<T> {
@@ -51,3 +48,9 @@ impl_mat_ops_sub!(Mat2<T>, 2, 2);
 impl_mat_ops_mul_number!(Mat2<T>, 2, 2);
 impl_mat_mul_mat!(Mat2<T>, 2, 2);
 impl_mat_index!(Mat2<T>, 2, 2);
+impl_mat_ops_div_number!(Mat2<T>, 2, 2);
+impl_mat_ops_neg!(Mat2<T>, 2, 2);
+impl_mat_ops_add_assign!(Mat2<T>, 2, 2);
+impl_mat_ops_sub_assign!(Mat2<T>, 2, 2);
+impl_mat_ops_mul_assign_number!(Mat2<T>, 2, 2);
+impl_mat_ops_div_assign_number!(Mat2<T>, 2, 2);
