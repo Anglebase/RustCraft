@@ -130,32 +130,66 @@ pub fn log(level: Level, owner: &str, message: &str) {
     });
 }
 
-/// 日志输出宏
+/// 调试日志输出宏
 #[macro_export]
+#[cfg(feature = "log_debug")]
 macro_rules! debug {
     ($owner:expr, $($arg:tt)*) => {
         $crate::log::log($crate::log::Level::Debug, $owner, &format_args!($($arg)*).to_string());
     };
 }
 
-/// 日志输出宏
 #[macro_export]
+#[cfg(not(feature = "log_debug"))]
+macro_rules! debug {
+    ($owner:expr, $($arg:tt)*) => {};
+}
+
+/// 消息日志输出宏
+#[macro_export]
+#[cfg(feature = "log_info")]
 macro_rules! info {
     ($owner:expr, $($arg:tt)*) => {
         $crate::log::log($crate::log::Level::Info, $owner, &format_args!($($arg)*).to_string());
     };
 }
 
-/// 日志输出宏
 #[macro_export]
+#[cfg(not(feature = "log_info"))]
+macro_rules! info {
+    ($owner:expr, $($arg:tt)*) => {
+        $crate::log::log($crate::log::Level::Info, $owner, &format_args!($($arg)*).to_string());
+    };
+}
+
+/// 警告日志输出宏
+#[macro_export]
+#[cfg(feature = "log_warn")]
 macro_rules! warn {
     ($owner:expr, $($arg:tt)*) => {
         $crate::log::log($crate::log::Level::Warn, $owner, &format_args!($($arg)*).to_string());
     };
 }
 
-/// 日志输出宏
 #[macro_export]
+#[cfg(not(feature = "log_warn"))]
+macro_rules! warn {
+    ($owner:expr, $($arg:tt)*) => {
+        $crate::log::log($crate::log::Level::Warn, $owner, &format_args!($($arg)*).to_string());
+    };
+}
+
+/// 错误日志输出宏
+#[macro_export]
+#[cfg(feature = "log_error")]
+macro_rules! error {
+    ($owner:expr, $($arg:tt)*) => {
+        $crate::log::log($crate::log::Level::Error, $owner, &format_args!($($arg)*).to_string());
+    };
+}
+
+#[macro_export]
+#[cfg(not(feature = "log_error"))]
 macro_rules! error {
     ($owner:expr, $($arg:tt)*) => {
         $crate::log::log($crate::log::Level::Error, $owner, &format_args!($($arg)*).to_string());

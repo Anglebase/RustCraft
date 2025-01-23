@@ -11,3 +11,11 @@ glfw = "0.59.0"
 image = "0.25.5"
 json = "0.12.4"
 lazy_static = "1.5.0"
+
+[features]
+log_error = []
+log_warn = ["log_error"]
+log_info = ["log_warn"]
+log_debug = ["log_info"]
+
+default = ["log_debug"]
