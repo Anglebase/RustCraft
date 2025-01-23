@@ -1,4 +1,4 @@
-use crate::{debug, error, info, RustCraftWrapper};
+use crate::{camera::Camera, debug, error, info, RustCraftWrapper, CAMERA_SYSTEM};
 use glfw::*;
 use lazy_static::lazy_static;
 use std::{
@@ -25,6 +25,7 @@ pub struct AppBuilder {
     cursor_pos_callback: Option<Box<dyn FnMut(&mut Window, f64, f64) + Send + 'static>>,
     scroll_callback: Option<Box<dyn FnMut(&mut Window, f64, f64) + Send + 'static>>,
     fix_cursor: bool,
+    vsync: bool,
 }
 
 impl Default for AppBuilder {
@@ -39,6 +40,7 @@ impl Default for AppBuilder {
             cursor_pos_callback: None,
             scroll_callback: None,
             fix_cursor: false,
+            vsync: false,
         }
     }
 }
@@ -52,8 +54,15 @@ impl AppBuilder {
         }
     }
 
+    /// 禁用鼠标光标
     pub fn disable_cursor(&mut self) -> &mut Self {
         self.fix_cursor = true;
+        self
+    }
+
+    /// 启用垂直同步
+    pub fn enable_vsync(&mut self) -> &mut Self {
+        self.vsync = true;
         self
     }
 
@@ -130,7 +139,7 @@ impl AppBuilder {
     /// 返回 `App` 实例
     ///
     /// # 注解 Note
-    /// 
+    ///
     /// 在应用程序周期内，此函数只能调用一次
     pub fn build(&mut self) -> App {
         UNIQUE_APP.apply(|data| {
@@ -164,18 +173,30 @@ impl AppBuilder {
             window.set_pos((mode.width - w) / 2, (mode.height - h) / 2);
         }
         // 设置 GLFW 窗口回调函数
-        if self.key_callback.is_some() {
-            let func = self.key_callback.take().unwrap();
-            window.set_key_callback(func);
-        }
-        if self.cursor_pos_callback.is_some() {
-            let func = self.cursor_pos_callback.take().unwrap();
-            window.set_cursor_pos_callback(func);
-        }
-        if self.scroll_callback.is_some() {
-            let func = self.scroll_callback.take().unwrap();
-            window.set_scroll_callback(func);
-        }
+        let mut func = self.key_callback.take();
+        window.set_key_callback(move |window, key, scancode, action, mods| {
+            if let Some(func) = func.as_mut() {
+                func(window, key, scancode, action, mods);
+            }
+        });
+        let mut func = self.cursor_pos_callback.take();
+        window.set_cursor_pos_callback(move |window, xpos, ypos| {
+            CAMERA_SYSTEM.apply(|sys| {
+                sys.mouse_move(xpos, ypos);
+            });
+            if let Some(func) = func.as_mut() {
+                func(window, xpos, ypos);
+            }
+        });
+        let mut func = self.scroll_callback.take();
+        window.set_scroll_callback(move |window, xoffset, yoffset| {
+            CAMERA_SYSTEM.apply(|sys| {
+                sys.mouse_scroll(xoffset, yoffset);
+            });
+            if let Some(func) = func.as_mut() {
+                func(window, xoffset, yoffset);
+            }
+        });
         let (size_tx, size_rx) = channel();
         window.set_size_callback(move |_, w, h| {
             size_tx.send((w, h)).unwrap();
@@ -188,6 +209,9 @@ impl AppBuilder {
         });
         if self.fix_cursor {
             window.set_cursor_mode(CursorMode::Disabled);
+        }
+        if self.vsync {
+            glfw.set_swap_interval(SwapInterval::Sync(1));
         }
         debug!("App::new()", "启动 GLFW 渲染线程 ...");
         let (tx, rx) = channel();
@@ -233,6 +257,9 @@ impl AppBuilder {
                 }
                 window.swap_buffers();
                 // 处理事件
+                CAMERA_SYSTEM.apply(|sys| {
+                    sys.update(&mut window);
+                });
                 if let Some(func) = event_callback.as_mut() {
                     func(&mut window);
                 }
