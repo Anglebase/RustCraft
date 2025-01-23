@@ -317,7 +317,9 @@ pub struct App {
 }
 
 pub enum TimeType {
+    /// 渲染帧时间
     Render,
+    /// 事件轮询帧时间
     PollEvent,
 }
 
