@@ -1,6 +1,7 @@
 use std::sync::Mutex;
 
 mod app;
+pub mod camera;
 pub(crate) mod gl_utils;
 pub mod log;
 mod model;
@@ -8,7 +9,7 @@ mod shader;
 mod texture;
 pub mod utils;
 
-pub use app::App;
+pub use app::{App, AppBuilder};
 pub use model::MODEL_MANAGER;
 pub use shader::SHADER_MANAGER;
 pub use texture::TEXTURE_MANAGER;

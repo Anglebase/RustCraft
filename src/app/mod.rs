@@ -7,65 +7,88 @@ use std::{
     time::Instant,
 };
 lazy_static! {
-    static ref RENDER_INIT_FUNC: RustCraftWrapper<Option<Box<dyn FnOnce() + Send + 'static>>> =
-        RustCraftWrapper::new(None);
-    static ref RENDER_LOOP_FUNC: RustCraftWrapper<Option<Box<dyn FnMut() + Send + 'static>>> =
-        RustCraftWrapper::new(None);
-    static ref KEY_CALLBACK: RustCraftWrapper<
-        Option<Box<dyn FnMut(&mut Window, Key, i32, Action, Modifiers) + Send + 'static>>,
-    > = RustCraftWrapper::new(None);
-    static ref EVENT_CALLBACK: RustCraftWrapper<Option<Box<dyn FnMut(&mut Window) + Send + 'static>>> =
-        RustCraftWrapper::new(None);
     static ref DELTA_TIME: RustCraftWrapper<f32> = RustCraftWrapper::new(0.0);
     static ref UNIQUE_APP: RustCraftWrapper<Option<()>> = RustCraftWrapper::new(None);
     static ref APP_TIME: RustCraftWrapper<Instant> = RustCraftWrapper::new(Instant::now());
     static ref WINDOW_SIZE: RustCraftWrapper<(i32, i32)> = RustCraftWrapper::new((0, 0));
 }
 
-pub struct App {
-    glfw: Glfw,
-    rx: Receiver<()>,
+pub struct AppBuilder {
+    size: (u32, u32),
+    title: String,
+
+    render_init_func: Option<Box<dyn FnOnce() + Send + 'static>>,
+    render_loop_func: Option<Box<dyn FnMut() + Send + 'static>>,
+    key_callback: Option<Box<dyn FnMut(&mut Window, Key, i32, Action, Modifiers) + Send + 'static>>,
+    event_callback: Option<Box<dyn FnMut(&mut Window) + Send + 'static>>,
+    cursor_pos_callback: Option<Box<dyn FnMut(&mut Window, f64, f64) + Send + 'static>>,
+    fix_cursor: bool,
 }
 
-impl App {
+impl Default for AppBuilder {
+    fn default() -> Self {
+        Self {
+            size: (800, 600),
+            title: "RustCraft".to_string(),
+            render_init_func: None,
+            render_loop_func: None,
+            key_callback: None,
+            event_callback: None,
+            cursor_pos_callback: None,
+            fix_cursor: false,
+        }
+    }
+}
+
+impl AppBuilder {
+    pub fn new(width: u32, height: u32, title: &str) -> Self {
+        Self {
+            size: (width, height),
+            title: title.to_string(),
+            ..Default::default()
+        }
+    }
+
+    pub fn disable_cursor(&mut self) -> &mut Self {
+        self.fix_cursor = true;
+        self
+    }
+
     /// 设置渲染线程初始化回调函数
     ///
     /// # 注解 Note
     /// + 调用此函数时，OpenGL 上下文已完成初始化
     /// + 此函数应在 `App::new()` 之前调用
-    pub fn set_render_init_callback<F>(func: F)
+    pub fn set_render_init_callback<F>(&mut self, func: F) -> &mut Self
     where
         F: FnOnce() + Send + 'static,
     {
-        RENDER_INIT_FUNC.apply(|data| {
-            *data = Some(Box::new(func));
-        });
+        self.render_init_func = Some(Box::new(func));
+        self
     }
     /// 设置渲染线程循环回调函数
     /// 此函数通常是渲染函数
     ///
     /// # 注解 Note
     /// 此函数应在 `App::new()` 之前调用
-    pub fn set_render_loop_callback<F>(func: F)
+    pub fn set_render_loop_callback<F>(&mut self, func: F) -> &mut Self
     where
         F: FnMut() + Send + 'static,
     {
-        RENDER_LOOP_FUNC.apply(|data| {
-            *data = Some(Box::new(func));
-        });
+        self.render_loop_func = Some(Box::new(func));
+        self
     }
 
     /// 设置键盘事件回调函数
     ///
     /// # 注解 Note
     /// 此函数应在 `App::new()` 之前调用
-    pub fn set_key_callback<F>(func: F)
+    pub fn set_key_callback<F>(&mut self, func: F) -> &mut Self
     where
         F: FnMut(&mut Window, Key, i32, Action, Modifiers) + Send + 'static,
     {
-        KEY_CALLBACK.apply(|data| {
-            *data = Some(Box::new(func));
-        });
+        self.key_callback = Some(Box::new(func));
+        self
     }
 
     /// 设置事件轮询函数
@@ -73,13 +96,24 @@ impl App {
     /// # 注解 Note
     /// + 此函数应在 `App::new()` 之前调用
     /// + 该函数在渲染线程执行，每一帧都会被调用一次
-    pub fn set_event_callback<F>(func: F)
+    pub fn set_event_callback<F>(&mut self, func: F) -> &mut Self
     where
         F: FnMut(&mut Window) + Send + 'static,
     {
-        EVENT_CALLBACK.apply(|data| {
-            *data = Some(Box::new(func));
-        });
+        self.event_callback = Some(Box::new(func));
+        self
+    }
+
+    /// 设置鼠标移动事件回调函数
+    ///
+    /// # 注解 Note
+    /// 此函数应在 `App::new()` 之前调用
+    pub fn set_cursor_pos_callback<F>(&mut self, func: F) -> &mut Self
+    where
+        F: FnMut(&mut Window, f64, f64) + Send + 'static,
+    {
+        self.cursor_pos_callback = Some(Box::new(func));
+        self
     }
 
     /// 执行应用程序初始化
@@ -93,7 +127,7 @@ impl App {
     /// 返回 `App` 实例
     ///
     /// # 注解 Note
-    pub fn new(width: u32, height: u32, title: &str) -> Self {
+    pub fn build(&mut self) -> App {
         UNIQUE_APP.apply(|data| {
             if data.is_some() {
                 panic!("只能创建一个 App 实例！");
@@ -110,7 +144,7 @@ impl App {
         };
         glfw.window_hint(WindowHint::Visible(false));
         let mut window = if let Some((window, _)) =
-            glfw.create_window(width, height, title, WindowMode::Windowed)
+            glfw.create_window(self.size.0, self.size.1, &self.title, WindowMode::Windowed)
         {
             window
         } else {
@@ -124,12 +158,14 @@ impl App {
             let (w, h) = window.get_size();
             window.set_pos((mode.width - w) / 2, (mode.height - h) / 2);
         }
-        KEY_CALLBACK.apply(|data| {
-            if data.is_some() {
-                let func = data.take().unwrap();
-                window.set_key_callback(func);
-            }
-        });
+        if self.key_callback.is_some() {
+            let func = self.key_callback.take().unwrap();
+            window.set_key_callback(func);
+        }
+        if self.cursor_pos_callback.is_some() {
+            let func = self.cursor_pos_callback.take().unwrap();
+            window.set_cursor_pos_callback(func);
+        }
         let (size_tx, size_rx) = channel();
         window.set_size_callback(move |_, w, h| {
             size_tx.send((w, h)).unwrap();
@@ -138,12 +174,18 @@ impl App {
             });
         });
         WINDOW_SIZE.apply(|data| {
-            *data = (width as i32, height as i32);
+            *data = (self.size.0 as i32, self.size.1 as i32);
         });
+        if self.fix_cursor {
+            window.set_cursor_mode(CursorMode::Disabled);
+        }
         debug!("App::new()", "启动 GLFW 渲染线程 ...");
         let (tx, rx) = channel();
         let (initialized_tx, initialized_rx) = channel();
         let (return_tx, return_rx) = channel();
+        let render_init_func = self.render_init_func.take();
+        let mut render_loop_func = self.render_loop_func.take();
+        let mut event_callback = self.event_callback.take();
         spawn(move || {
             debug!("App::new()/render", "GLFW 渲染线程已启动");
             debug!("App::new()/render", "正在初始化 OpenGL 上下文 ...");
@@ -153,12 +195,9 @@ impl App {
             gl::Viewport::load_with(|symbol| window.get_proc_address(symbol) as *const _);
             debug!("App::new()/render", "初始化渲染依赖 ...");
             // 初始化渲染依赖
-            RENDER_INIT_FUNC.apply(|data| {
-                if data.is_some() {
-                    let func = data.take().unwrap();
-                    func();
-                }
-            });
+            if let Some(func) = render_init_func {
+                func();
+            }
             // 暂时借出所有权
             initialized_tx.send(window).unwrap();
             let mut window: PWindow = return_rx.recv().unwrap();
@@ -179,18 +218,14 @@ impl App {
                     unsafe { gl::Viewport(0, 0, w as i32, h as i32) }
                 }
                 // 渲染
-                RENDER_LOOP_FUNC.apply(|data| {
-                    if let Some(func) = data.as_mut() {
-                        func();
-                    }
-                });
+                if let Some(func) = render_loop_func.as_mut() {
+                    func();
+                }
                 window.swap_buffers();
                 // 处理事件
-                EVENT_CALLBACK.apply(|data| {
-                    if let Some(func) = data.as_mut() {
-                        func(&mut window);
-                    }
-                });
+                if let Some(func) = event_callback.as_mut() {
+                    func(&mut window);
+                }
             }
             debug!("App::new()/render", "渲染线程已退出");
             info!("App", "程序即将退出");
@@ -204,10 +239,16 @@ impl App {
             return_tx.send(window).unwrap();
         }
         debug!("App::new()", "GLFW 渲染线程已初始化");
-
-        Self { glfw, rx }
+        App { glfw, rx }
     }
+}
 
+pub struct App {
+    glfw: Glfw,
+    rx: Receiver<()>,
+}
+
+impl App {
     /// 启动事件循环
     pub fn exec(&mut self) {
         debug!("App::exec()", "启动事件循环 ...");
@@ -217,6 +258,7 @@ impl App {
         debug!("App::exec()", "事件循环已退出");
     }
 
+    
     /// 获取当前渲染帧率
     pub fn fps() -> f32 {
         let mut fps = 0.0;
