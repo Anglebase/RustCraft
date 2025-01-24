@@ -35,7 +35,7 @@ impl Camera for SpaceCamera {
         let dt = App::delta_time(TimeType::PollEvent);
         let speed = self.speed * dt;
         let up = Vec3::from([0.0, 1.0, 0.0]);
-        let front = (Vec4::from([0.0, 0.0, -1.0, 1.0]) * rotate3_y(-radian(self.yaw))).xyz();
+        let front = (Vec4::from([0.0, 0.0, -1.0, 1.0]) * rotate3_y(radian(self.yaw))).xyz();
         let right = front.cross(up).normalize();
         if window.get_key(glfw::Key::W) == glfw::Action::Press {
             self.pos += front * speed;
@@ -57,11 +57,11 @@ impl Camera for SpaceCamera {
         }
 
         let front = Vec4::from([0.0, 0.0, -0.1, 1.0])
-            * rotate3_x(radian(self.pitch))
-            * rotate3_y(-radian(self.yaw));
+            * rotate3_x(-radian(self.pitch))
+            * rotate3_y(radian(self.yaw));
         let up = Vec4::from([0.0, 1.0, 0.0, 1.0])
-            * rotate3_x(radian(self.pitch))
-            * rotate3_y(-radian(self.yaw));
+            * rotate3_x(-radian(self.pitch))
+            * rotate3_y(radian(self.yaw));
         self.view_matrix = look_at(self.pos, self.pos + front.xyz(), up.xyz());
     }
 

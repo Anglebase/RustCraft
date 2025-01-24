@@ -23,14 +23,13 @@ impl Camera for GodCamera {
 
     fn update(&mut self, window: &mut glfw::Window) {
         self.move_camera = window.get_mouse_button(glfw::MouseButtonLeft) == glfw::Action::Press;
-        let pos = Vec4::<f32>::from([0.0, 0.0, 0.0, 1.0])
-            * tranlate3(Vec3::from([0.0, 0.0, 2.0_f32.powf(self.x)]))
-            * rotate3_x(radian(self.pitch))
-            * rotate3_y(radian(-self.yaw));
+        let pos = Vec4::<f32>::from([0.0, 0.0, 2.0_f32.powf(self.x), 1.0])
+            * rotate3_x(-radian(self.pitch))
+            * rotate3_y(radian(self.yaw));
         let target = Vec3::<f32>::new();
         let up = Vec4::<f32>::from([0.0, 1.0, 0.0, 1.0])
-            * rotate3_x(radian(self.pitch))
-            * rotate3_y(radian(-self.yaw));
+            * rotate3_x(-radian(self.pitch))
+            * rotate3_y(radian(self.yaw));
         self.view_matrix = look_at(pos.xyz(), target, up.xyz());
     }
 
