@@ -25,7 +25,7 @@ fn render_init() {
     TEXTURE_MANAGER.load_from("texture/");
 
     MODEL_MANAGER.load_from_file("model/cube.json");
-    CAMERA_SYSTEM.add_camera("main", GodCamera::new(2.0, 0.1, 0.15));
+    CAMERA_SYSTEM.add_camera("main", GodCamera::new(2.0, 0.2, 0.12));
     CAMERA_SYSTEM.active_camera("main");
     unsafe {
         gl::Enable(gl::DEPTH_TEST);
