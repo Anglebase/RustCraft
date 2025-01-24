@@ -34,6 +34,8 @@ pub struct AppBuilder {
     event_callback: Option<Box<dyn FnMut(&mut Window) + Send + 'static>>,
     cursor_pos_callback: Option<Box<dyn FnMut(&mut Window, f64, f64) + Send + 'static>>,
     scroll_callback: Option<Box<dyn FnMut(&mut Window, f64, f64) + Send + 'static>>,
+    button_callback:
+        Option<Box<dyn FnMut(&mut Window, MouseButton, Action, Modifiers) + Send + 'static>>,
     fix_cursor: bool,
     vsync: bool,
 }
@@ -49,6 +51,7 @@ impl Default for AppBuilder {
             event_callback: None,
             cursor_pos_callback: None,
             scroll_callback: None,
+            button_callback: None,
             fix_cursor: false,
             vsync: false,
         }
@@ -79,8 +82,7 @@ impl AppBuilder {
     /// 设置渲染线程初始化回调函数
     ///
     /// # 注解 Note
-    /// + 调用此函数时，OpenGL 上下文已完成初始化
-    /// + 此函数应在 `App::new()` 之前调用
+    /// 调用此函数时，OpenGL 上下文已完成初始化
     pub fn set_render_init_callback<F>(&mut self, func: F) -> &mut Self
     where
         F: FnOnce() + Send + 'static,
@@ -89,10 +91,9 @@ impl AppBuilder {
         self
     }
     /// 设置渲染线程循环回调函数
-    /// 此函数通常是渲染函数
     ///
     /// # 注解 Note
-    /// 此函数应在 `App::new()` 之前调用
+    /// 此函数通常是渲染函数
     pub fn set_render_loop_callback<F>(&mut self, func: F) -> &mut Self
     where
         F: FnMut() + Send + 'static,
@@ -102,9 +103,6 @@ impl AppBuilder {
     }
 
     /// 设置键盘事件回调函数
-    ///
-    /// # 注解 Note
-    /// 此函数应在 `App::new()` 之前调用
     pub fn set_key_callback<F>(&mut self, func: F) -> &mut Self
     where
         F: FnMut(&mut Window, Key, i32, Action, Modifiers) + Send + 'static,
@@ -116,8 +114,7 @@ impl AppBuilder {
     /// 设置事件轮询函数
     ///
     /// # 注解 Note
-    /// + 此函数应在 `App::new()` 之前调用
-    /// + 该函数在渲染线程执行，每一帧都会被调用一次
+    /// + 该函数在轮询线程执行，每一帧都会被调用一次
     pub fn set_event_callback<F>(&mut self, func: F) -> &mut Self
     where
         F: FnMut(&mut Window) + Send + 'static,
@@ -127,14 +124,29 @@ impl AppBuilder {
     }
 
     /// 设置鼠标移动事件回调函数
-    ///
-    /// # 注解 Note
-    /// 此函数应在 `App::new()` 之前调用
     pub fn set_cursor_pos_callback<F>(&mut self, func: F) -> &mut Self
     where
         F: FnMut(&mut Window, f64, f64) + Send + 'static,
     {
         self.cursor_pos_callback = Some(Box::new(func));
+        self
+    }
+
+    /// 设置滚轮事件回调函数
+    pub fn set_scroll_callback<F>(&mut self, func: F) -> &mut Self
+    where
+        F: FnMut(&mut Window, f64, f64) + Send + 'static,
+    {
+        self.scroll_callback = Some(Box::new(func));
+        self
+    }
+
+    /// 设置鼠标按键事件回调函数
+    pub fn set_button_callback<F>(&mut self, func: F) -> &mut Self
+    where
+        F: FnMut(&mut Window, MouseButton, Action, Modifiers) + Send + 'static,
+    {
+        self.button_callback = Some(Box::new(func));
         self
     }
 
@@ -205,6 +217,12 @@ impl AppBuilder {
             });
             if let Some(func) = func.as_mut() {
                 func(window, xoffset, yoffset);
+            }
+        });
+        let mut func = self.button_callback.take();
+        window.set_mouse_button_callback(move |window, button, action, mods| {
+            if let Some(func) = func.as_mut() {
+                func(window, button, action, mods);
             }
         });
         let (size_tx, size_rx) = channel();
