@@ -23,7 +23,7 @@ fn render_init() {
     MODEL_MANAGER.load_from_file("model/cube.json");
     CAMERA_SYSTEM.add_camera(
         "main",
-        SpaceCamera::new(Vec3::from([0.0, 0.0, 0.0]), 3.0, 0.08),
+        SpaceCamera::new(Vec3::from([3.0, 0.0, 0.0]), 3.0, 0.08),
     );
     CAMERA_SYSTEM.active_camera("main");
     unsafe {
