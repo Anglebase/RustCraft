@@ -17,17 +17,13 @@ pub struct SpaceCamera {
 
     speed: f32,
     sen: f32,
+
+    view_matrix: Mat4<f32>,
 }
 
 impl Camera for SpaceCamera {
     fn view_matrix(&self) -> Mat4<f32> {
-        let front = Vec4::from([0.0, 0.0, -0.1, 1.0])
-            * rotate3_x(-radian(self.pitch))
-            * rotate3_y(radian(self.yaw));
-        let up = Vec4::from([0.0, 1.0, 0.0, 1.0])
-            * rotate3_x(-radian(self.pitch))
-            * rotate3_y(radian(self.yaw));
-        look_at(self.pos, self.pos + front.xyz(), up.xyz())
+        self.view_matrix
     }
 
     fn update(&mut self, window: &mut glfw::Window) {
@@ -57,6 +53,14 @@ impl Camera for SpaceCamera {
         if window.get_key(glfw::Key::LeftShift) == glfw::Action::Press {
             self.pos -= up * speed;
         }
+        
+        let front = Vec4::from([0.0, 0.0, -0.1, 1.0])
+            * rotate3_x(-radian(self.pitch))
+            * rotate3_y(radian(self.yaw));
+        let up = Vec4::from([0.0, 1.0, 0.0, 1.0])
+            * rotate3_x(-radian(self.pitch))
+            * rotate3_y(radian(self.yaw));
+        self.view_matrix =look_at(self.pos, self.pos + front.xyz(), up.xyz());
     }
 
     fn mouse_move(&mut self, xpos: f64, ypos: f64) {
@@ -105,6 +109,7 @@ impl SpaceCamera {
             first_mouse: true,
             speed,
             sen,
+            view_matrix: Mat4::I(),
         }
     }
 }
