@@ -85,10 +85,6 @@ impl Camera for SpaceCamera {
             self.pitch = -89.0;
         }
     }
-
-    fn mouse_scroll(&mut self, xoffset: f64, yoffset: f64) {
-        let _ = (xoffset, yoffset);
-    }
 }
 
 impl SpaceCamera {
