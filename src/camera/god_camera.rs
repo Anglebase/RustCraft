@@ -1,4 +1,4 @@
-use super::Camera;
+use super::{Camera, CAMERA_SYSTEM};
 use crate::utils::{math::*, *};
 
 pub struct GodCamera {
@@ -23,7 +23,6 @@ impl Camera for GodCamera {
 
     fn update(&mut self, window: &mut glfw::Window) {
         self.move_camera = window.get_mouse_button(glfw::MouseButtonLeft) == glfw::Action::Press;
-
         let pos = Vec4::<f32>::from([0.0, 0.0, 0.0, 1.0])
             * tranlate3(Vec3::from([0.0, 0.0, 2.0_f32.powf(self.x)]))
             * rotate3_x(radian(self.pitch))
@@ -65,10 +64,10 @@ impl Camera for GodCamera {
 }
 
 impl GodCamera {
-    pub fn new(sen: f32, scl: f32) -> Self {
+    pub fn new(x: f32, sen: f32, scl: f32) -> Self {
         Self {
             view_matrix: Mat4::I(),
-            x: 3.0,
+            x,
             yaw: 0.0,
             pitch: 0.0,
             sen,

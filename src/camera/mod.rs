@@ -23,7 +23,6 @@ pub use space_camera::SpaceCamera;
 pub struct CameraSystem {
     cameras: HashMap<String, Box<dyn Camera + Send + 'static>>,
     active_camera: Option<String>,
-    enable_mouse: bool,
 }
 
 impl Camera for CameraSystem {
@@ -57,9 +56,6 @@ impl Camera for CameraSystem {
     ///
     /// 此函数于主线程(鼠标移动回调函数)中执行
     fn mouse_move(&mut self, xpos: f64, ypos: f64) {
-        if self.enable_mouse {
-            return;
-        }
         if let Some(name) = self.active_camera.as_ref() {
             self.cameras.get_mut(name).unwrap().mouse_move(xpos, ypos);
         }
@@ -71,9 +67,6 @@ impl Camera for CameraSystem {
     ///
     /// 此函数于主线程(鼠标滚轮回调函数)中执行
     fn mouse_scroll(&mut self, xoffset: f64, yoffset: f64) {
-        if self.enable_mouse {
-            return;
-        }
         if let Some(name) = self.active_camera.as_ref() {
             self.cameras
                 .get_mut(name)
@@ -88,7 +81,6 @@ impl CameraSystem {
         Self {
             cameras: HashMap::new(),
             active_camera: None,
-            enable_mouse: true,
         }
     }
 
@@ -135,11 +127,5 @@ impl RustCraftWrapper<CameraSystem> {
             mat = sys.view_matrix();
         });
         mat
-    }
-
-    pub fn enable_mouse(&self, enable: bool) {
-        self.apply(|sys| {
-            sys.enable_mouse = enable;
-        });
     }
 }

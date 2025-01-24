@@ -19,6 +19,7 @@ pub struct SpaceCamera {
     sen: f32,
 
     view_matrix: Mat4<f32>,
+    fix_camera: bool,
 }
 
 impl Camera for SpaceCamera {
@@ -27,13 +28,14 @@ impl Camera for SpaceCamera {
     }
 
     fn update(&mut self, window: &mut glfw::Window) {
-        if window.get_key(glfw::Key::LeftAlt) == glfw::Action::Press {
+        self.fix_camera = window.get_key(glfw::Key::LeftAlt) == glfw::Action::Press;
+        if self.fix_camera {
             return;
         }
         let dt = App::delta_time(TimeType::PollEvent);
         let speed = self.speed * dt;
         let up = Vec3::from([0.0, 1.0, 0.0]);
-        let front = (Vec4::from([0.0, 0.0, -1.0, 1.0]) * rotate3_y(radian(self.yaw))).xyz();
+        let front = (Vec4::from([0.0, 0.0, -1.0, 1.0]) * rotate3_y(-radian(self.yaw))).xyz();
         let right = front.cross(up).normalize();
         if window.get_key(glfw::Key::W) == glfw::Action::Press {
             self.pos += front * speed;
@@ -53,17 +55,20 @@ impl Camera for SpaceCamera {
         if window.get_key(glfw::Key::LeftShift) == glfw::Action::Press {
             self.pos -= up * speed;
         }
-        
+
         let front = Vec4::from([0.0, 0.0, -0.1, 1.0])
-            * rotate3_x(-radian(self.pitch))
-            * rotate3_y(radian(self.yaw));
+            * rotate3_x(radian(self.pitch))
+            * rotate3_y(-radian(self.yaw));
         let up = Vec4::from([0.0, 1.0, 0.0, 1.0])
-            * rotate3_x(-radian(self.pitch))
-            * rotate3_y(radian(self.yaw));
-        self.view_matrix =look_at(self.pos, self.pos + front.xyz(), up.xyz());
+            * rotate3_x(radian(self.pitch))
+            * rotate3_y(-radian(self.yaw));
+        self.view_matrix = look_at(self.pos, self.pos + front.xyz(), up.xyz());
     }
 
     fn mouse_move(&mut self, xpos: f64, ypos: f64) {
+        if self.fix_camera {
+            return;
+        }
         if self.first_mouse {
             self.last_x = xpos;
             self.last_y = ypos;
@@ -106,6 +111,7 @@ impl SpaceCamera {
             speed,
             sen,
             view_matrix: Mat4::I(),
+            fix_camera: false,
         }
     }
 }

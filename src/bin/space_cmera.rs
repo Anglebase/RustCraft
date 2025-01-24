@@ -14,14 +14,6 @@ pub fn key_callback(window: &mut Window, key: Key, scancode: i32, action: Action
             debug!("Events", "ESC 被按下，程序将退出");
             window.set_should_close(true)
         }
-        (Key::LeftAlt, Action::Press) => {
-            window.set_cursor_mode(CursorMode::Normal);
-            CAMERA_SYSTEM.enable_mouse(true);
-        }
-        (Key::LeftAlt, Action::Release) => {
-            window.set_cursor_mode(CursorMode::Disabled);
-            CAMERA_SYSTEM.enable_mouse(false);
-        }
         _ => {}
     }
     let _ = (window, key, scancode, action, mods);

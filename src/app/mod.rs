@@ -237,7 +237,6 @@ impl AppBuilder {
         });
         if self.fix_cursor {
             window.set_cursor_mode(CursorMode::Disabled);
-            CAMERA_SYSTEM.enable_mouse(false);
         }
         WINDOW.apply(move |w| {
             *w = Some(window);
