@@ -1,7 +1,6 @@
-use math::*;
-
 use super::*;
-use crate::{utils::*, App, TimeType};
+use mats::*;
+use crate::{ App, TimeType};
 
 pub struct SpaceCamera {
     pos: Vec3<f32>,

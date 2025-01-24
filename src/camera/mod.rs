@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
-use crate::{utils::Mat4, warn, RustCraftWrapper};
+use mats::Mat4;
+use crate::{warn, RustCraftWrapper};
 
 pub trait Camera {
     fn view_matrix(&self) -> Mat4<f32>;

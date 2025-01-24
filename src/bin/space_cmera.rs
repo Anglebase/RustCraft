@@ -1,7 +1,7 @@
 use camera::SpaceCamera;
 use glfw::*;
-use rustcraft::{debug, log::*, utils::Mat4, *};
-use utils::{perspective, radian, Vec3};
+use mats::*;
+use rustcraft::{debug, log::*, *};
 
 pub fn key_callback(window: &mut Window, key: Key, scancode: i32, action: Action, mods: Modifiers) {
     match (key, action) {

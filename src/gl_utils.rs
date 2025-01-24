@@ -1,7 +1,7 @@
 use gl::types::*;
 use std::ffi::CString;
 
-use crate::utils::SetUniform;
+use mats::uniform::SetUniform;
 
 pub unsafe fn complie_shader(shader_type: GLenum, source: &str) -> Result<GLuint, String> {
     let shader = gl::CreateShader(shader_type);

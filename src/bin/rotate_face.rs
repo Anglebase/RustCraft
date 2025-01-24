@@ -1,5 +1,5 @@
-use rustcraft::{debug, log::*, utils::Mat4, *};
-use utils::{look_at, math::rotate3, perspective, radian, Vec3};
+use mats::*;
+use rustcraft::{debug, log::*, *};
 
 fn render_init() {
     debug!("render::init()", "正在载入着色器...");

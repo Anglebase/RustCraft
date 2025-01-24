@@ -1,5 +1,5 @@
 use super::Camera;
-use crate::utils::{math::*, *};
+use mats::*;
 
 pub struct GodCamera {
     view_matrix: Mat4<f32>,

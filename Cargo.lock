@@ -550,6 +550,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "mats"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4700652346e95c1f4dc42526d0a2394477bbd58da094069909c3b78919b349ca"
+dependencies = [
+ "gl",
+]
+
+[[package]]
 name = "maybe-rayon"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -890,6 +899,7 @@ dependencies = [
  "image",
  "json",
  "lazy_static",
+ "mats",
 ]
 
 [[package]]

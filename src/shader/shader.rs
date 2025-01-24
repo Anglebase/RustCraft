@@ -2,9 +2,9 @@ use gl::types::*;
 
 use crate::{
     gl_utils::{self},
-    utils::SetUniform,
     warn,
 };
+use mats::uniform::SetUniform;
 
 pub struct Shader {
     pub(crate) program: GLuint,

@@ -9,7 +9,6 @@ pub mod log;
 mod model;
 mod shader;
 mod texture;
-pub mod utils;
 
 pub use app::{App, AppBuilder, TimeType};
 pub use camera::CAMERA_SYSTEM;

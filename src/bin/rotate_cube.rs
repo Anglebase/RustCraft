@@ -1,10 +1,6 @@
 use glfw::*;
-use rustcraft::{debug, log::*, utils::Mat4, *};
-use utils::{
-    look_at,
-    math::{rotate3, tranlate3},
-    perspective, radian, Vec3,
-};
+use mats::*;
+use rustcraft::{debug, log::*, *};
 
 pub fn key_callback(window: &mut Window, key: Key, scancode: i32, action: Action, mods: Modifiers) {
     match (key, action) {
