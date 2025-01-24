@@ -23,7 +23,7 @@ fn render_loop() {
     let proj = perspective(radian(45.0), 800.0 / 600.0, 0.1, 100.0);
 
     let shader = SHADER_MANAGER.get("face").unwrap();
-    let model: Mat4<f32> = rotate3(radian(App::time() * 100.0), Vec3::from([0.0, -1.0, -1.0]));
+    let model: Mat4<f32> = rotate3(radian(App::time() * 100.0), Vec3::from([0.0, 0.0, 1.0]));
     shader.use_program();
     shader.set_uniform("trans", model);
     shader.set_uniform("view", view);

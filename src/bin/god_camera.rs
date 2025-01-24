@@ -1,11 +1,10 @@
-use camera::SpaceCamera;
+use camera::GodCamera;
 use glfw::*;
 use rustcraft::{debug, log::*, utils::Mat4, *};
 use utils::{
     // math::{rotate3, tranlate3},
     perspective,
     radian,
-    Vec3,
 };
 
 pub fn key_callback(window: &mut Window, key: Key, scancode: i32, action: Action, mods: Modifiers) {
@@ -13,14 +12,6 @@ pub fn key_callback(window: &mut Window, key: Key, scancode: i32, action: Action
         (Key::Escape, Action::Press) => {
             debug!("Events", "ESC 被按下，程序将退出");
             window.set_should_close(true)
-        }
-        (Key::LeftAlt, Action::Press) => {
-            window.set_cursor_mode(CursorMode::Normal);
-            CAMERA_SYSTEM.enable_mouse(true);
-        }
-        (Key::LeftAlt, Action::Release) => {
-            window.set_cursor_mode(CursorMode::Disabled);
-            CAMERA_SYSTEM.enable_mouse(false);
         }
         _ => {}
     }
@@ -34,10 +25,7 @@ fn render_init() {
     TEXTURE_MANAGER.load_from("texture/");
 
     MODEL_MANAGER.load_from_file("model/cube.json");
-    CAMERA_SYSTEM.add_camera(
-        "main",
-        SpaceCamera::new(Vec3::from([0.0, 0.0, 0.0]), 3.0, 0.08),
-    );
+    CAMERA_SYSTEM.add_camera("main", GodCamera::new(0.1, 0.15));
     CAMERA_SYSTEM.active_camera("main");
     unsafe {
         gl::Enable(gl::DEPTH_TEST);
