@@ -1,6 +1,6 @@
 use std::sync::Mutex;
 
-pub use {gl, glfw, image, json};
+pub use {gl, glfw, image, json, mats};
 
 mod app;
 pub mod camera;
