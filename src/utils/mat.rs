@@ -245,7 +245,8 @@ where
     T: Copy + Default,
 {
     /// 生成当前矩阵的转置矩阵
-    pub fn transpose(&self) -> Mat<T, N, M> {
+    #[allow(non_snake_case)]
+    pub fn T(&self) -> Mat<T, N, M> {
         let mut result = Mat::<T, N, M>::new();
         for i in 0..M {
             for j in 0..N {
@@ -253,6 +254,10 @@ where
             }
         }
         result
+    }
+
+    pub fn transpose(&self) -> Mat<T, N, M> {
+        self.T()
     }
 }
 
@@ -270,6 +275,10 @@ where
             result.data[i][i] = T::from(1.0);
         }
         result
+    }
+
+    pub fn identity() -> Self {
+        Self::I()
     }
 }
 
