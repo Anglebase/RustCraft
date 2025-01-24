@@ -1,12 +1,7 @@
 use camera::SpaceCamera;
 use glfw::*;
 use rustcraft::{debug, log::*, utils::Mat4, *};
-use utils::{
-    // math::{rotate3, tranlate3},
-    perspective,
-    radian,
-    Vec3,
-};
+use utils::{perspective, radian, Vec3};
 
 pub fn key_callback(window: &mut Window, key: Key, scancode: i32, action: Action, mods: Modifiers) {
     match (key, action) {
@@ -46,8 +41,6 @@ fn render_loop() {
     let proj = perspective(radian(45.0), w as f32 / h as f32, 0.1, 100.0);
 
     let shader = SHADER_MANAGER.get("cube").unwrap();
-    // let model: Mat4<f32> = rotate3(radian(App::time() * 100.0), Vec3::from([1.0, 1.0, 0.0]));
-    // let model = tranlate3(Vec3::from([0.0, 0.0, -1.0])) * model;
     let model = Mat4::<f32>::I();
     shader.use_program();
     shader.set_uniform("model", model);
