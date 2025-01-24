@@ -1,5 +1,7 @@
 use std::sync::Mutex;
 
+pub use {gl, glfw, image, json};
+
 mod app;
 pub mod camera;
 pub(crate) mod gl_utils;
