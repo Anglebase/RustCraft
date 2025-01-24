@@ -141,7 +141,7 @@ impl RustCraftWrapper<ModelManager> {
     /// # 参数 Parameters
     ///
     /// - `name`: 模型名称
-    /// 
+    ///
     /// # 注解 Note
     ///
     /// 此函数只有在 OpenGL 上下文激活后才能调用
